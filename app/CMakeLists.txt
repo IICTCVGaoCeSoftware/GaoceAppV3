@@ -13,7 +13,7 @@ target_link_libraries(APP PUBLIC ${PCL_LIBRARIES} ${VTK_LIBRARIES})
 
 
 target_link_libraries(APP PUBLIC _PCH
-  Eyestack::Framework Eyestack::Gencom Eyestack::Com_MVS
+  Eyestack::Framework Eyestack::Gencom Eyestack::Com_MVS Eyestack::Com_DLP
   GaoCe::ALGO Qt5::PrintSupport Qt5::Charts
 )
 

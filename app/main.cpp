@@ -1,33 +1,28 @@
-#include <boost/thread/thread.hpp>
-#include <iostream>
-#include <pcl/io/pcd_io.h>
-#include <pcl/io/ply_io.h>
-#include <pcl\visualization\pcl_visualizer.h>
+#include "Worker.hpp"
 
 int
 main(int argc, char* argv[])
 {
-  //------------------------------------ 加载点云
-  pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud(
-    new pcl::PointCloud<pcl::PointXYZRGB>);
-  pcl::PCDReader reader;
+  esf::Application app(argc, argv);
+  // app.setApplicationName("高测系统 (v" GaoCeAppV3_VERSION ")");
+  es::Gencom::ginit();
+  es::Com_DLP::ginit();
+  es::Com_MVS::ginit();
 
-  pcl::PolygonMesh mesh;
-  if (pcl::io::loadPLYFile("bun_zipper.ply", mesh) == -1) {
-    std::cerr << "can't load point cloud file" << std::endl;
-    return -1;
-  }
-  boost::shared_ptr<pcl::visualization::PCLVisualizer> viewer(
-    new pcl::visualization::PCLVisualizer("cloud"));
-  viewer->addPolygonMesh(mesh, "mesh");
+  auto worker = new Worker();
 
-  ///必选
-  while (!viewer->wasStopped()) {
-    viewer->spinOnce(100);
-    std::this_thread::sleep_for(std::chrono::microseconds(100000)); //正确
-  }
-  //==============================================================================
+  app.reg_worker(worker);
 
-  return 0;
+  esg::VideoCapture::SubUi _vcSubUi{ worker->_vc, "视频\n捕获器" };
+  _vcSubUi.setWindowTitle("视频捕获器");
+  app.reg_sub_ui(_vcSubUi);
+
+  es::Com_MVS::MvsCamera::SubUi _mcUi{ worker->_mc, "相机输入" };
+  app.reg_sub_ui(_mcUi);
+
+  es::Com_DLP::DLP::SubUi _dlpUi{ worker->_dlp, "投影仪" };
+  app.reg_sub_ui(_dlpUi);
+
+  return app.exec();
 }
 

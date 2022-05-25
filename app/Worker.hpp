@@ -1,5 +1,6 @@
 #pragma once
 
+#include <Eyestack/Com_DLP/DLP.hpp>
 #include <Eyestack/Com_MVS/MvsCamera.hpp>
 #include <Eyestack/Framework.hpp>
 #include <Eyestack/Gencom.hpp>
@@ -24,6 +25,7 @@ public:
   std::unique_ptr<GaoCe::GaoCe> _algo;
   esg::VideoCapture _vc{ *this };
   es::Com_MVS::MvsCamera _mc{ *this };
+  es::Com_DLP::DLP _dlp{ *this };
   std::atomic_bool _noStop{ false };
 
 signals:
