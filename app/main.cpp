@@ -1,10 +1,13 @@
 #include "Worker.hpp"
+#include "version.hpp"
+#include "wrapper.hpp"
 
 int
 main(int argc, char* argv[])
 {
   esf::Application app(argc, argv);
-  // app.setApplicationName("高测系统 (v" GaoCeAppV3_VERSION ")");
+  app.setApplicationName("高测系统 (v" GaoCeAppV3_VERSION ")");
+
   es::Gencom::ginit();
   es::Com_DLP::ginit();
   es::Com_MVS::ginit();
@@ -22,6 +25,9 @@ main(int argc, char* argv[])
 
   es::Com_DLP::DLP::SubUi _dlpUi{ worker->_dlp, "投影仪" };
   app.reg_sub_ui(_dlpUi);
+
+  GaoCeConfigSubUi _cSubUi{ *worker };
+  app.reg_sub_ui(_cSubUi);
 
   return app.exec();
 }

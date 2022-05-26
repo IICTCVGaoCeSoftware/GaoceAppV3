@@ -1,5 +1,7 @@
 #pragma once
 
+#include "DLP_Calibration.hpp"
+#include "MVS_Calibration.h"
 #include "Worker.hpp"
 #include <Eyestack/Framework.hpp>
 
@@ -30,5 +32,15 @@ class GaoCeConfigSubUi : public esf::MainWindow::SubUi::MdiMenu
   using _S = esf::MainWindow::SubUi::MdiMenu;
 
 public:
+  MVS_Calibration _MVScal;
+  QMdiSubWindow& _swMVScal;
+  DLP_Calibration _DLPcal;
+  QMdiSubWindow& _swDLPcal;
+
+public:
   GaoCeConfigSubUi(Worker& worker);
+
+  // private slots:
+  //   void disable_all();
+  //   void enable_all();
 };

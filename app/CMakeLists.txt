@@ -6,6 +6,9 @@ add_library(APP OBJECT
 
   wrapper.hpp wrapper.cpp
   Worker.hpp Worker.cpp
+  MVS_Calibration.h MVS_Calibration.cpp
+  DLP_Calibration.hpp DLP_Calibration.cpp
+  PatternCoding.hpp PatternCoding.cpp
 
 )
 

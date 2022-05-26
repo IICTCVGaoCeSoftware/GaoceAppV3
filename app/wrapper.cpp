@@ -2,6 +2,10 @@
 
 GaoCeConfigSubUi::GaoCeConfigSubUi(Worker& worker)
   : _S("算法")
+  , _MVScal(*worker._algo)
+  , _swMVScal(add_mdi_action("相机标定", _MVScal))
+  , _DLPcal(*worker._algo)
+  , _swDLPcal(add_mdi_action("投影仪标定", _DLPcal))
 {
 
 }
