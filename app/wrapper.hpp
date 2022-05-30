@@ -2,6 +2,8 @@
 
 #include "DLP_Calibration.hpp"
 #include "MVS_Calibration.h"
+#include "PatternCoding.hpp"
+#include "ReConstructWindow.hpp"
 #include "Worker.hpp"
 #include <Eyestack/Framework.hpp>
 
@@ -36,6 +38,10 @@ public:
   QMdiSubWindow& _swMVScal;
   DLP_Calibration _DLPcal;
   QMdiSubWindow& _swDLPcal;
+  PatternCoding _PatternCoding;
+  QMdiSubWindow& _swPatternCoding;
+  ReConstructWindow _reConWin;
+  QMdiSubWindow& _swReconWin;
 
 public:
   GaoCeConfigSubUi(Worker& worker);

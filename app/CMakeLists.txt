@@ -9,7 +9,8 @@ add_library(APP OBJECT
   MVS_Calibration.h MVS_Calibration.cpp
   DLP_Calibration.hpp DLP_Calibration.cpp
   PatternCoding.hpp PatternCoding.cpp
-
+  ReConstructWindow.hpp ReConstructWindow.cpp
+  reconstuction.h reconstuction.cpp reconstuction.ui
 )
 
 target_link_libraries(APP PUBLIC ${PCL_LIBRARIES} ${VTK_LIBRARIES})

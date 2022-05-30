@@ -6,6 +6,10 @@ GaoCeConfigSubUi::GaoCeConfigSubUi(Worker& worker)
   , _swMVScal(add_mdi_action("相机标定", _MVScal))
   , _DLPcal(*worker._algo)
   , _swDLPcal(add_mdi_action("投影仪标定", _DLPcal))
+  , _PatternCoding(*worker._algo)
+  , _swPatternCoding(add_mdi_action("图案编码", _PatternCoding))
+  , _reConWin(*worker._algo)
+  , _swReconWin(add_mdi_action("重建窗口", _reConWin))
 {
 
 }

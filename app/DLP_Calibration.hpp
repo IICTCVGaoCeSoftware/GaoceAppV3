@@ -50,6 +50,18 @@ private:
     cv::Mat _proReprojErr;  //输出，重投影误差
   };
 
+public:
+  // 点击刷新，算法自动提取角点
+  void find_procorners(
+    cv::Mat& proImg,              //输入，相机采集的单张图像
+    cv::Size proPatternSize,      //输入，行列方向的棋盘格个数
+    CV_OUT cv::Mat* proCorners,   //输出，投影图案角点的像素坐标
+    CV_OUT cv::Mat* proCamCorners //输出，棋盘格角点的像素坐标
+  );
+
+  // 点击标定按钮，得到DLP的内外参数和畸变系数
+  void projector_calib(CalibProjProcessParam& calibProjProcessParam);
+
 private:
   GaoCe::GaoCe& _algo;
   QWidget _leftWidget;
