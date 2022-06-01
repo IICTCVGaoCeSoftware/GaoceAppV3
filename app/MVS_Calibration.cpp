@@ -69,7 +69,10 @@ MVS_Calibration::MVS_Calibration(GaoCe::GaoCe& algo, QWidget* parent)
 
   auto calLayout = new QHBoxLayout();
   calLayout->addWidget(&_calButton);
+  calLayout->addSpacing(30);
   calLayout->addWidget(&_errorShow);
+  calLayout->addWidget(&_error);
+  calLayout->addSpacing(30);
   calLayout->addWidget(&_reCalButton);
 
   auto Finallayout = new QVBoxLayout();

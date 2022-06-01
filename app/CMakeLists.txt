@@ -10,7 +10,6 @@ add_library(APP OBJECT
   DLP_Calibration.hpp DLP_Calibration.cpp
   PatternCoding.hpp PatternCoding.cpp
   ReConstructWindow.hpp ReConstructWindow.cpp
-  reconstuction.h reconstuction.cpp reconstuction.ui
 )
 
 target_link_libraries(APP PUBLIC ${PCL_LIBRARIES} ${VTK_LIBRARIES})
@@ -24,8 +23,6 @@ target_link_libraries(APP PUBLIC _PCH
 target_include_directories(APP INTERFACE ${CMAKE_CURRENT_SOURCE_DIR})
 
 target_precompile_headers(APP REUSE_FROM _PCH)
-
-
 
 #
 # 应用程序可执行文件

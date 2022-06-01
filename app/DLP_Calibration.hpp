@@ -4,6 +4,7 @@
 #include "pcl/point_types.h"
 #include <Eyestack/Design/ImageBench.hpp>
 #include <Eyestack/Design/Progressor.hpp>
+#include <Eyestack/Design/QuadrangleSelector.hpp>
 #include <Eyestack/Framework.hpp>
 
 namespace esb = Eyestack::Base;
@@ -33,8 +34,8 @@ private:
   struct CalibProjProcessParam
   {
     //输入，该窗口相机采集的所有有效图像角点
-    std::vector<cv::Mat> _proImgCorners;
-    std::vector<cv::Size> _proPatternSize; //输入，行列方向投影的棋盘格个数
+    QVector<cv::Mat> _proImgCorners;
+    QVector<cv::Size> _proPatternSize; //输入，行列方向投影的棋盘格个数
     cv::Size _proResolution;               //投影仪的分辨率
     double _proRealDx; //输入，投影图案的水平偏移
     double _proRealDy; //输入，投影图案的竖直偏移
@@ -66,11 +67,14 @@ private:
   GaoCe::GaoCe& _algo;
   QWidget _leftWidget;
   QStackedLayout _leftLayout;
+  esd::QuadrangleSelector _inputBench;
   esd::ImageBench _bench;
   QLabel _imageNum, _chessNum, _initOffset, _chessDis, _errorShow, _cornerPoint;
-  QLabel _resolution;
+  QLabel _resolution, _multi;
   QSpinBox _imageSpin, _rowNumSpin, _colNumSpin;
-  QSpinBox _rowSize, _colSize, _reso, _horiDis, _verDis;
+  QSpinBox _rowSize, _colSize, _horiDis, _verDis;
+  QLineEdit _reso1, _reso2;
   QPushButton _refreshButton, _calButton, _reCalButton;
   QPushButton _selPoint, _noSelPoint;
+  QLineEdit _error;
 };

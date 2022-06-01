@@ -27,11 +27,13 @@ DLP_Calibration::DLP_Calibration(GaoCe::GaoCe& algo, QWidget* parent)
   _cornerPoint.setText("采用当前角点");
   _selPoint.setText("√");
   _noSelPoint.setText("×");
-  _errorShow.setText("重投影误差显示");
+  _errorShow.setText("重投影误差显示:");
   _resolution.setText("投影分辨率");
+  _multi.setText("×");
 
   // 布局界面
   _leftWidget.setLayout(&_leftLayout);
+  _leftLayout.addWidget(&_inputBench);
   _leftLayout.addWidget(&_bench);
 
   // 右边的垂直界面
@@ -58,7 +60,9 @@ DLP_Calibration::DLP_Calibration(GaoCe::GaoCe& algo, QWidget* parent)
   // 投影分辨率
   auto resolutionlayout = new QHBoxLayout();
   resolutionlayout->addWidget(&_resolution);
-  resolutionlayout->addWidget(&_reso);
+  resolutionlayout->addWidget(&_reso1);
+  resolutionlayout->addWidget(&_multi);
+  resolutionlayout->addWidget(&_reso2);
   vlayout->addLayout(resolutionlayout);
 
   // 棋盘格的顶点间距
@@ -81,10 +85,15 @@ DLP_Calibration::DLP_Calibration(GaoCe::GaoCe& algo, QWidget* parent)
   auto hlayout = new QHBoxLayout();
   hlayout->addWidget(&_leftWidget);
   hlayout->addLayout(vlayout);
+  hlayout->setStretch(0, 8);
+  hlayout->setStretch(1, 2);
 
   auto calLayout = new QHBoxLayout();
   calLayout->addWidget(&_calButton);
+  calLayout->addSpacing(30);
   calLayout->addWidget(&_errorShow);
+  calLayout->addWidget(&_error);
+  calLayout->addSpacing(30);
   calLayout->addWidget(&_reCalButton);
 
   auto Finallayout = new QVBoxLayout();

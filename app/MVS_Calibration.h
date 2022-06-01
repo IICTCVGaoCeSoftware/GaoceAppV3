@@ -59,27 +59,6 @@ private:
     cv::Mat _internalProjParamMat; //  投影仪内参
   };
 
-  struct ReconstructParam
-  {
-    cv::Mat _camOriPt;            //  相机原点
-    cv::Mat _dirLineVectors;      // 相机直线的方向向量
-    cv::Mat _internalCamParamMat; // 相机内参
-    cv::Mat _externalPlaneMat;    // 投影仪面方程信息
-    int _offsetGrayCode;          // 格雷码偏移值
-    int _numPlanes;               //  平面的个数
-    int _projMaxValue;            // 投影仪的投射最大值
-    float _minThresholdContrast;  //  对比度
-  };
-
-  struct TransformDepthImageParam
-  {
-    cv::Mat _externalProjParamMat; // 投影仪外参
-    cv::Mat _internalProjParamMat; //投影仪内参
-    cv::Size _depthImageSize;      //深度图像大小
-    float _scaleDepth;             //尺度系数
-    pcl::PointCloud<pcl::PointXYZ>* _cloud;
-  };
-
 public:
   // 标定相机窗口，点击刷新按钮，算法自动提取角点
   void find_camcorners(
@@ -100,4 +79,5 @@ private:
   QSpinBox _rowSize, _colSize;
   QPushButton _refreshButton, _calButton, _reCalButton;
   QPushButton _selPoint, _noSelPoint;
+  QLineEdit _error;
 };

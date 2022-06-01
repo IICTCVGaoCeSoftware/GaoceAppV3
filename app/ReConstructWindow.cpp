@@ -1,4 +1,5 @@
 #include "ReConstructWindow.hpp"
+#include "pcl/io/pcd_io.h"
 
 ReConstructWindow::ReConstructWindow(GaoCe::GaoCe& algo, QWidget* parent)
   : _S(parent)
@@ -10,10 +11,16 @@ ReConstructWindow::ReConstructWindow(GaoCe::GaoCe& algo, QWidget* parent)
   _savePCL.setText("保存点云");
   _saveDeepImg.setText("保存深度图");
   _showCamera.setText("显示相机画面");
+  _showCamera.setEnabled(true);
   _showDeepImg.setText("显示深度图像");
+  _showDeepImg.setEnabled(true);
 
   cloud.reset(new pcl::PointCloud<pcl::PointXYZRGB>);
   QString filename = "G:/bun_zipper.ply";
+
+  if (pcl::io::loadPCDFile(filename.toStdString(), *cloud) == -1) {
+    qDebug() << "输入错误";
+  }
   //读取文件
   vtkSmartPointer<vtkPLYReader> reader = vtkSmartPointer<vtkPLYReader>::New();
   reader->SetFileName(filename.toStdString().c_str());
@@ -61,4 +68,9 @@ ReConstructWindow::ReConstructWindow(GaoCe::GaoCe& algo, QWidget* parent)
   finalLayout->setStretch(1, 1);
 
   setLayout(finalLayout);
+
+  //  connect(&_camera,
+  //          &esd::Monitor::s_powerClicked,
+  //          this,
+  //          &_T::when_configMonitor_powerClicked);
 }
