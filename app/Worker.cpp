@@ -3,29 +3,15 @@
 void
 Worker::c_start(qint64 cycle)
 {
-  try {
-    _algo->init_param();
-  } catch (...) {
-    esf::Application::notifier().notify_error(std::current_exception(),
-                                              "运行启动失败");
-    return;
-  }
+  //  try {
+  //    _algo->init_param();
+  //  } catch (...) {
+  //    esf::Application::notifier().notify_error(std::current_exception(),
+  //                                              "运行启动失败");
+  //    return;
+  //  }
 
   _S::c_start(cycle);
-}
-
-void
-Worker::c_trigger()
-{
-  try {
-    _algo->init_param();
-  } catch (...) {
-    esf::Application::notifier().notify_error(std::current_exception(),
-                                              "运行启动失败");
-    return;
-  }
-
-  _S::c_trigger();
 }
 
 void
@@ -49,15 +35,15 @@ Worker::work()
     return;
   }
 
-  mat = _algo->warp_perspective(mat);
-  auto results = _algo->detect(mat);
+  // mat = _algo->warp_perspective(mat);
+  // auto results = _algo->detect(mat);
 
-  bool noStop = _noStop.load(std::memory_order_relaxed);
-  if (results.size() != 0 && !noStop)
-    c_stop();
+  //  bool noStop = _noStop.load(std::memory_order_relaxed);
+  //  if (results.size() != 0 && !noStop)
+  //    c_stop();
 
-  emit s_displayGaoCeResults(
-    mat,
-    QSharedPointer<std::vector<GaoCe::GaoCe::Result>>::create(
-      std::move(results)));
+  //  emit s_displayGaoCeResults(
+  //    mat,
+  //    QSharedPointer<std::vector<GaoCe::GaoCe::Result>>::create(
+  //      std::move(results)));
 }

@@ -10,30 +10,106 @@ GaoCeConfigSubUi::GaoCeConfigSubUi(Worker& worker)
   , _swPatternCoding(add_mdi_action("图案编码", _PatternCoding))
   , _reConWin(*worker._algo)
   , _swReconWin(add_mdi_action("重建窗口", _reConWin))
-{
 
+{
 }
 
 void
-GaoCeWrapper::init_param()
+GaoCeWrapper::recon_pcl_with_gray_liting(std::vector<cv::Mat>& inputImgs,
+                                         pcl::PointCloud<pcl::PointXYZ>* cloud)
 {
-  return _gaoce->init_param();
+  try {
+    return _gaoce->recon_pcl_with_gray_liting(inputImgs, cloud);
+
+  } catch (...) {
+    esf::Application::notifier().notify_error(std::current_exception(),
+                                              "高测算法");
+  }
 }
 
 void
-GaoCeWrapper::reset_config() noexcept
+GaoCeWrapper::transform_depth_image(pcl::PointCloud<pcl::PointXYZ>& cloud,
+                                    CV_OUT cv::Mat* depthImage)
 {
-  return _gaoce->reset_config();
+  try {
+    return _gaoce->transform_depth_image(cloud, depthImage);
+
+  } catch (...) {
+    esf::Application::notifier().notify_error(std::current_exception(),
+                                              "高测算法");
+  }
 }
 
 void
-GaoCeWrapper::dump_config(QDataStream& ds) noexcept(false)
+GaoCeWrapper::find_camcorners(cv::Mat& camImg,
+                              cv::Size camPatternSize,
+                              CV_OUT cv::Mat* camCorners)
 {
-  return _gaoce->dump_config(ds);
+  try {
+    return _gaoce->find_camcorners(camImg, camPatternSize, camCorners);
+
+  } catch (...) {
+    esf::Application::notifier().notify_error(std::current_exception(),
+                                              "高测算法");
+  }
 }
 
 void
-GaoCeWrapper::load_config(QDataStream& ds) noexcept(false)
+GaoCeWrapper::camera_calib(::GaoCe::CalibCamProcessParam& calibCamProcessParam)
 {
-  return _gaoce->load_config(ds);
+  try {
+    return _gaoce->camera_calib(calibCamProcessParam);
+
+  } catch (...) {
+    esf::Application::notifier().notify_error(std::current_exception(),
+                                              "高测算法");
+  }
+}
+
+void
+GaoCeWrapper::find_procorners(cv::Mat& proImg,
+                              cv::Mat& cornersCoarse,
+                              cv::Size proPatternSize,
+                              CV_OUT cv::Mat* proCorners,
+                              CV_OUT cv::Mat* proCamCorners)
+{
+  try {
+    return _gaoce->find_procorners(
+      proImg, cornersCoarse, proPatternSize, proCorners, proCamCorners);
+
+  } catch (...) {
+    esf::Application::notifier().notify_error(std::current_exception(),
+                                              "高测算法");
+  }
+}
+
+void
+GaoCeWrapper::rays_palnes(CV_OUT ::GaoCe::CalibOutputParam* calibOutputParam)
+{
+  try {
+    return _gaoce->rays_palnes(calibOutputParam);
+
+  } catch (...) {
+    esf::Application::notifier().notify_error(std::current_exception(),
+                                              "高测算法");
+  }
+}
+
+void
+GaoCeWrapper::projector_calib(
+  ::GaoCe::CalibProjProcessParam& calibProjProcessParam)
+{
+  try {
+    return _gaoce->projector_calib(calibProjProcessParam);
+
+  } catch (...) {
+    esf::Application::notifier().notify_error(std::current_exception(),
+                                              "高测算法");
+  }
+}
+
+void
+GaoCeWrapper::data_transform()
+{
+  return _gaoce->data_transform();
 }

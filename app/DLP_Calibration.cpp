@@ -9,22 +9,31 @@ DLP_Calibration::DLP_Calibration(GaoCe::GaoCe& algo, QWidget* parent)
 {
   // 配置组件
   _imageSpin.setPrefix("采集图像 ");
+  _imageSpin.setValue(10);
   _imageSpin.setSuffix(" 张");
   _rowNumSpin.setPrefix("行方向 ");
+  _rowNumSpin.setValue(16);
   _colNumSpin.setPrefix("列方向 ");
+  _colNumSpin.setValue(15);
   _chessNum.setText("棋盘格个数");
   _rowSize.setPrefix("行方向 ");
+  _rowSize.setValue(5);
   _rowSize.setSuffix(" mm");
   _colSize.setPrefix("列方向 ");
+  _colSize.setValue(0);
   _colSize.setSuffix(" mm");
   _horiDis.setPrefix("水平间距 ");
+  _horiDis.setValue(31);
   _horiDis.setSuffix(" mm");
   _verDis.setPrefix("垂直间距 ");
+  _verDis.setValue(23);
   _verDis.setSuffix(" mm");
   _imageNum.setText("采集图像的张数");
   _initOffset.setText("初始偏移");
   _chessDis.setText("棋盘格的顶点间距");
   _cornerPoint.setText("采用当前角点");
+  _reso1.setText("1280");
+  _reso2.setText("720");
   _selPoint.setText("√");
   _noSelPoint.setText("×");
   _errorShow.setText("重投影误差显示:");
@@ -101,6 +110,35 @@ DLP_Calibration::DLP_Calibration(GaoCe::GaoCe& algo, QWidget* parent)
   Finallayout->addLayout(calLayout);
 
   setLayout(Finallayout);
+  // 连接信号
+  connect(
+    &_refreshButton, &QPushButton::clicked, this, &_T::on_refresh_clicked);
+  connect(&_calButton, &QPushButton::clicked, this, &_T::on_calButton_clicked);
 
   _leftLayout.setCurrentIndex(0);
+}
+
+void
+DLP_Calibration::on_refresh_clicked()
+{
+  //  cv::Size2i num(_rowNumSpin.text().toInt(), _colNumSpin.text().toInt());
+  //  QString str = cv::Mat input =
+  //  cv::imread("D:/IICT/DLPPattern/images/camera");
+  //  _algo.find_camcorners(_getInput(), num, result);
+  //  _bench.display(_getInput());
+  QString str = "D:/IICT/DLPPattern/images/projector/P";
+  QString s = QString::number(temp++);
+  str = str + s;
+  str += ".bmp";
+  cv::Mat image = cv::imread(str.toStdString());
+  cv::Size2i num(_rowNumSpin.text().toInt(), _colNumSpin.text().toInt());
+  //  // cv::Mat* result;
+  //  //   _algo.find_camcorners(_getInput(), num, result);
+  //  _bench.display(image);
+}
+
+void
+DLP_Calibration::on_calButton_clicked()
+{
+  _algo.projector_calib(_param);
 }

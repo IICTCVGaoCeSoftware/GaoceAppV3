@@ -11,16 +11,13 @@ ReConstructWindow::ReConstructWindow(GaoCe::GaoCe& algo, QWidget* parent)
   _savePCL.setText("保存点云");
   _saveDeepImg.setText("保存深度图");
   _showCamera.setText("显示相机画面");
-  _showCamera.setEnabled(true);
+  _showCamera.setChecked(true);
   _showDeepImg.setText("显示深度图像");
   _showDeepImg.setEnabled(true);
 
   cloud.reset(new pcl::PointCloud<pcl::PointXYZRGB>);
   QString filename = "G:/bun_zipper.ply";
 
-  if (pcl::io::loadPCDFile(filename.toStdString(), *cloud) == -1) {
-    qDebug() << "输入错误";
-  }
   //读取文件
   vtkSmartPointer<vtkPLYReader> reader = vtkSmartPointer<vtkPLYReader>::New();
   reader->SetFileName(filename.toStdString().c_str());
@@ -69,8 +66,47 @@ ReConstructWindow::ReConstructWindow(GaoCe::GaoCe& algo, QWidget* parent)
 
   setLayout(finalLayout);
 
-  //  connect(&_camera,
-  //          &esd::Monitor::s_powerClicked,
-  //          this,
-  //          &_T::when_configMonitor_powerClicked);
+  // 连接信号
+  connect(&_reconOnce, &QPushButton::clicked, this, &_T::on_reconOnce_clicked);
+  connect(&_reconContinue,
+          &QPushButton::clicked,
+          this,
+          &_T::on_reconContinue_clicked);
+  connect(&_reconStop, &QPushButton::clicked, this, &_T::on_reconStop_clicked);
+  connect(&_savePCL, &QPushButton::clicked, this, &_T::on_savePCL_clicked);
+  connect(
+    &_saveDeepImg, &QPushButton::clicked, this, &_T::on_saveDeepImg_clicked);
+
+  connect(
+    &_showCamera, SIGNAL(stateChanged(int)), this, SLOT(onStateChanged(int)));
 }
+
+void
+ReConstructWindow::onStateChanged(int state)
+{
+  if (state == Qt::Checked) {
+    _camera.show();
+  } else if (state == Qt::Unchecked) {
+    _camera.hide();
+  }
+}
+
+void
+ReConstructWindow::on_reconOnce_clicked()
+{}
+
+void
+ReConstructWindow::on_reconContinue_clicked()
+{}
+
+void
+ReConstructWindow::on_reconStop_clicked()
+{}
+
+void
+ReConstructWindow::on_savePCL_clicked()
+{}
+
+void
+ReConstructWindow::on_saveDeepImg_clicked()
+{}

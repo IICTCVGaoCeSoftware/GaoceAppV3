@@ -13,7 +13,7 @@ set(BOOST_ROOT "D:/ICAC/boost_1_76_0")
 set(Boost_INCLUDE_DIR "D:/ICAC/boost_1_76_0")
 
 # 算法库搜索目录
-set(GaoCe_DIR "D:/IICT/GaoCe-1.0.2-win64/cmake")
+set(GaoCeV3_DIR "D:/IICT/GaoCeV3-0.0.0-win64(3)/cmake")
 
 # PCL
 set(PCL_ROOT "D:/Program Files/PCL1.10.1")

@@ -13,12 +13,17 @@ MVS_Calibration::MVS_Calibration(GaoCe::GaoCe& algo, QWidget* parent)
 {
   // 配置组件
   _imageSpin.setPrefix("采集图像 ");
+  _imageSpin.setValue(10);
   _imageSpin.setSuffix(" 张");
   _rowNumSpin.setPrefix("行方向 ");
+  _rowNumSpin.setValue(10);
   _colNumSpin.setPrefix("列方向 ");
+  _colNumSpin.setValue(6);
   _rowSize.setPrefix("行方向 ");
+  _rowSize.setValue(5);
   _rowSize.setSuffix(" mm");
   _colSize.setPrefix("列方向 ");
+  _colSize.setValue(5);
   _colSize.setSuffix(" mm");
   _imageNum.setText("采集图像的张数");
   _chessNum.setText("棋盘格个数");
@@ -81,5 +86,41 @@ MVS_Calibration::MVS_Calibration(GaoCe::GaoCe& algo, QWidget* parent)
 
   setLayout(Finallayout);
 
+  // 连接信号
+  connect(
+    &_refreshButton, &QPushButton::clicked, this, &_T::on_refresh_clicked);
+
   _leftLayout.setCurrentIndex(0);
+}
+
+void
+MVS_Calibration::on_refresh_clicked()
+{
+  QString str = "D:/IICT/DLPPattern/images/camera/C";
+  QString s = QString::number(temp++);
+  str = str + s;
+  str += ".bmp";
+  cv::Mat image = cv::imread(str.toStdString());
+  cv::Size2i num(_rowNumSpin.text().toInt(), _colNumSpin.text().toInt());
+  // cv::Mat* result = nullptr;
+  //_algo.find_camcorners(image, num, result);
+  // cv::Point2d p(result->at<double>(0), result->at<double>(1));
+  // qDebug() << p.x << " " << p.y;
+  _bench.display(image);
+}
+
+void
+MVS_Calibration::on_selPoint_clicked()
+{
+  cv::Size2i num(_rowNumSpin.text().toInt(), _colNumSpin.text().toInt());
+  _param._camCornersMat.push_back(_corner);
+  _param._camPatternSize.push_back(num);
+  _param._camRealDx = _xSize.text().toDouble();
+  _param._camRealDy = _ySize.text().toDouble();
+}
+
+void
+MVS_Calibration::on_calButton_clicked()
+{
+  _algo.camera_calib(_param);
 }
