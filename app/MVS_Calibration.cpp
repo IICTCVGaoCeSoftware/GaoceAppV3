@@ -96,17 +96,17 @@ MVS_Calibration::MVS_Calibration(GaoCe::GaoCe& algo, QWidget* parent)
 void
 MVS_Calibration::on_refresh_clicked()
 {
-  QString str = "D:/IICT/DLPPattern/images/camera/C";
+  QString str = "E://projects//EXP//images//images//C";
   QString s = QString::number(temp++);
   str = str + s;
   str += ".bmp";
   cv::Mat image = cv::imread(str.toStdString());
-  cv::Size2i num(_rowNumSpin.text().toInt(), _colNumSpin.text().toInt());
-  // cv::Mat* result = nullptr;
-  //_algo.find_camcorners(image, num, result);
-  // cv::Point2d p(result->at<double>(0), result->at<double>(1));
-  // qDebug() << p.x << " " << p.y;
   _bench.display(image);
+  cv::Size camPatternSize = cv::Size(11, 6);
+  // cv::Size2i num(_rowNumSpin.text().toInt(), _colNumSpin.text().toInt());
+  _algo.find_camcorners(image, camPatternSize, &result);
+  cv::Point2d p(result.at<double>(0), result.at<double>(1));
+  qDebug() << p.x << " " << p.y;
 }
 
 void

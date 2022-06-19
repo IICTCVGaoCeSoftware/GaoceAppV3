@@ -12,8 +12,10 @@ add_library(APP OBJECT
   DLP_Calibration.hpp DLP_Calibration.cpp
   PatternCoding.hpp PatternCoding.cpp
   ReConstructWindow.hpp ReConstructWindow.cpp
-  recon_3D.hpp
-  calib_3D.hpp
+  recon_3D.hpp recon_3D.cpp
+  calib_3D.hpp calib_3D.cpp
+  V2.hpp V2.cpp
+
 )
 
 target_link_libraries(APP PUBLIC ${PCL_LIBRARIES} ${VTK_LIBRARIES})

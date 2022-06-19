@@ -367,7 +367,7 @@
 // std::unique_ptr<GaoCe>
 // create_v2()
 //{
-//   return std::make_unique<V2>();
+//   return std::unique_ptr<V2>(new V2());
 // }
 // }
 

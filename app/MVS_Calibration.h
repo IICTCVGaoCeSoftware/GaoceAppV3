@@ -52,6 +52,7 @@ private:
   QLineEdit _error;
   QDoubleSpinBox _xSize, _ySize;
   cv::Mat _corner;
+  cv::Mat result;
   int temp = 1;
 
 private slots:
