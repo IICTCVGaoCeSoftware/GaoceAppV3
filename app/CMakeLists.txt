@@ -1,21 +1,17 @@
-set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /STACK:10000000")
-
+set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /STACK:100000000")
+set (PreferredToolArchitecture x64)
 #
 # 应用程序主体代码
 #
 add_library(APP OBJECT
   # 主函数
-
   wrapper.hpp wrapper.cpp
   Worker.hpp Worker.cpp
   MVS_Calibration.h MVS_Calibration.cpp
   DLP_Calibration.hpp DLP_Calibration.cpp
   PatternCoding.hpp PatternCoding.cpp
   ReConstructWindow.hpp ReConstructWindow.cpp
-  recon_3D.hpp recon_3D.cpp
-  calib_3D.hpp calib_3D.cpp
   V2.hpp V2.cpp
-
 )
 
 target_link_libraries(APP PUBLIC ${PCL_LIBRARIES} ${VTK_LIBRARIES})

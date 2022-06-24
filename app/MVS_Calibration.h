@@ -40,9 +40,9 @@ public:
 
 private:
   GaoCe::GaoCe& _algo;
-  GaoCe::CalibCamProcessParam _param;
+  GaoCe::CalibCamProcessParam calibCamProcessParam;
   QWidget _leftWidget;
-  QStackedLayout _leftLayout;
+  QVBoxLayout _leftLayout;
   esd::ImageBench _bench;
   QLabel _imageNum, _chessNum, _chessSize, _errorShow, _cornerPoint;
   QSpinBox _imageSpin, _rowNumSpin, _colNumSpin;
@@ -51,7 +51,8 @@ private:
   QPushButton _selPoint, _noSelPoint;
   QLineEdit _error;
   QDoubleSpinBox _xSize, _ySize;
-  cv::Mat _corner;
+  QLabel _current;
+  cv::Mat camCorners;
   cv::Mat result;
   int temp = 1;
 

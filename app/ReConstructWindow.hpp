@@ -46,15 +46,21 @@ public:
   ReConstructWindow(GaoCe::GaoCe& algo, QWidget* parent = nullptr);
 
 private:
+  void initialVtkWidget();
   GaoCe::GaoCe& _algo;
   // esd::ImageLabel _camera;
   esd::Monitor _camera;
+  QWidget* _widget1;
   QTimer _timer;
   QPushButton _reconOnce, _reconContinue, _reconStop, _savePCL, _saveDeepImg;
   QVTKOpenGLNativeWidget _pointCloud;
   QCheckBox _showCamera, _showDeepImg;
-  boost::shared_ptr<pcl::visualization::PCLVisualizer> _viewer;
-  pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud;
+  pcl::PointCloud<pcl::PointXYZ> cloud;
+  pcl::PointCloud<pcl::PointXYZ>::Ptr cloud2;
+  cv::Mat transform_depth_image;
+
+  boost::shared_ptr<pcl::visualization::PCLVisualizer> _viewer111;
+  esd::ImageLabel _deepImg;
 
 private slots:
   // 配置界面的电源键控制监视定时器的启动和停止
@@ -62,9 +68,11 @@ private slots:
   // 当 _timer 计时结束时取帧刷新到界面上
   // void when_timer_timeout();
   void onStateChanged(int state);
+  void onStateChanged1(int state);
   void on_reconOnce_clicked();
   void on_reconContinue_clicked();
   void on_reconStop_clicked();
   void on_savePCL_clicked();
   void on_saveDeepImg_clicked();
+  void on_showDeepImg_checked();
 };

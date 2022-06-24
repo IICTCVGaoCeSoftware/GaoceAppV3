@@ -1,4 +1,5 @@
 #include "DLP_Calibration.hpp"
+#include "wrapper.hpp"
 
 DLP_Calibration::DLP_Calibration(GaoCe::GaoCe& algo, QWidget* parent)
   : _S(parent)
@@ -39,11 +40,14 @@ DLP_Calibration::DLP_Calibration(GaoCe::GaoCe& algo, QWidget* parent)
   _errorShow.setText("重投影误差显示:");
   _resolution.setText("投影分辨率");
   _multi.setText("×");
+  _current.setText("当前选取图片" + QString::number(temp));
+  _excCorner.setText("提取角点");
+
+  //  proCamAllCornersCoarse = read_matlab(); //所有的粗角点
 
   // 布局界面
-  _leftWidget.setLayout(&_leftLayout);
   _leftLayout.addWidget(&_inputBench);
-  _leftLayout.addWidget(&_bench);
+  _leftLayout.addWidget(&_current);
 
   // 右边的垂直界面
   auto vlayout = new QVBoxLayout();
@@ -84,6 +88,9 @@ DLP_Calibration::DLP_Calibration(GaoCe::GaoCe& algo, QWidget* parent)
   // 刷新输入
   vlayout->addWidget(&_refreshButton);
 
+  // 提取角点
+  vlayout->addWidget(&_excCorner);
+
   // 是否采用角点
   vlayout->addWidget(&_cornerPoint);
   auto pointLayout = new QHBoxLayout();
@@ -92,7 +99,7 @@ DLP_Calibration::DLP_Calibration(GaoCe::GaoCe& algo, QWidget* parent)
   vlayout->addLayout(pointLayout);
 
   auto hlayout = new QHBoxLayout();
-  hlayout->addWidget(&_leftWidget);
+  hlayout->addLayout(&_leftLayout);
   hlayout->addLayout(vlayout);
   hlayout->setStretch(0, 8);
   hlayout->setStretch(1, 2);
@@ -114,31 +121,124 @@ DLP_Calibration::DLP_Calibration(GaoCe::GaoCe& algo, QWidget* parent)
   connect(
     &_refreshButton, &QPushButton::clicked, this, &_T::on_refresh_clicked);
   connect(&_calButton, &QPushButton::clicked, this, &_T::on_calButton_clicked);
-
-  _leftLayout.setCurrentIndex(0);
+  connect(&_selPoint, &QPushButton::clicked, this, &_T::on_selPoint_clicked);
+  connect(&_excCorner, &QPushButton::clicked, this, &_T::on_excCorner_clicked);
 }
 
 void
 DLP_Calibration::on_refresh_clicked()
 {
-  //  cv::Size2i num(_rowNumSpin.text().toInt(), _colNumSpin.text().toInt());
-  //  QString str = cv::Mat input =
-  //  cv::imread("D:/IICT/DLPPattern/images/camera");
-  //  _algo.find_camcorners(_getInput(), num, result);
-  //  _bench.display(_getInput());
+  _current.setText("当前选取图片" + QString::number(temp));
+
   QString str = "D:/IICT/DLPPattern/images/projector/P";
   QString s = QString::number(temp++);
   str = str + s;
   str += ".bmp";
-  cv::Mat image = cv::imread(str.toStdString());
-  cv::Size2i num(_rowNumSpin.text().toInt(), _colNumSpin.text().toInt());
-  //  // cv::Mat* result;
-  //  //   _algo.find_camcorners(_getInput(), num, result);
-  //  _bench.display(image);
+  image = cv::imread(str.toStdString());
+
+  _inputBench.display(image);
+  _refreshButton.setEnabled(false);
+}
+
+void
+DLP_Calibration::on_excCorner_clicked()
+{
+  cv::Size proPatternSize = cv::Size(16, 15);
+  cv::Mat imgProGray;
+  cv::cvtColor(image, imgProGray, cv::COLOR_BGR2GRAY);
+
+  cv::Mat proCamCornersCoarse = cv::Mat(4, 1, CV_32FC2);
+  proCamCornersCoarse.at<cv::Vec2f>(0, 0)[0] =
+    _inputBench.get_quadrangle()[0].x;
+  proCamCornersCoarse.at<cv::Vec2f>(0, 0)[1] =
+    _inputBench.get_quadrangle()[0].y;
+
+  proCamCornersCoarse.at<cv::Vec2f>(3, 0)[0] =
+    _inputBench.get_quadrangle()[1].x;
+  proCamCornersCoarse.at<cv::Vec2f>(3, 0)[1] =
+    _inputBench.get_quadrangle()[1].y;
+
+  proCamCornersCoarse.at<cv::Vec2f>(1, 0)[0] =
+    _inputBench.get_quadrangle()[2].x;
+  proCamCornersCoarse.at<cv::Vec2f>(1, 0)[1] =
+    _inputBench.get_quadrangle()[2].y;
+
+  proCamCornersCoarse.at<cv::Vec2f>(2, 0)[0] =
+    _inputBench.get_quadrangle()[3].x;
+  proCamCornersCoarse.at<cv::Vec2f>(2, 0)[1] =
+    _inputBench.get_quadrangle()[3].y;
+
+  _algo.find_procorners(imgProGray,
+                        proCamCornersCoarse,
+                        proPatternSize,
+                        &proImgCorners,
+                        &proCamCorners);
+  std::vector<cv::Point2f> imagecorner = cv::Mat_<cv::Point2f>(proImgCorners);
+  std::vector<cv::Point2f> camcorner = cv::Mat_<cv::Point2f>(proCamCorners);
+
+  for (uint8_t i = 0; i < imagecorner.size(); i++) {
+    circle(image, imagecorner[i], 10, cv::Scalar(0, 0, 255), 5);
+  }
+
+  for (uint8_t i = 0; i < camcorner.size(); i++) {
+    circle(image, camcorner[i], 10, cv::Scalar(0, 255, 0), 5);
+  }
+
+  _excCorner.setEnabled(false);
+  _inputBench.display(image);
+}
+
+void
+DLP_Calibration::on_selPoint_clicked()
+{
+  cv::Size proPatternSize = cv::Size(16, 15);
+  calibProjProcessPara._proImgCorners.push_back(proImgCorners);
+  calibProjProcessPara._proCamCorners.push_back(proCamCorners);
+  calibProjProcessPara._proPatternSize.push_back(proPatternSize);
+  QMessageBox MBox;
+  MBox.setWindowTitle("提示");
+  MBox.setText("提取角点成功");
+  MBox.exec();
+  _refreshButton.setEnabled(true);
+  _excCorner.setEnabled(true);
+
+  for (uint8_t i = 0; i < calibProjProcessPara._proCamCorners[0].rows *
+                            calibProjProcessPara._proCamCorners[0].cols;
+       i++) {
+    qDebug() << "Sel corners2 x" << i
+             << calibProjProcessPara._proCamCorners[0].at<cv::Vec2f>(i, 0)[0];
+    qDebug() << "Sel corners2 y" << i
+             << calibProjProcessPara._proCamCorners[0].at<cv::Vec2f>(i, 0)[1];
+  }
 }
 
 void
 DLP_Calibration::on_calButton_clicked()
 {
-  _algo.projector_calib(_param);
+  calibProjProcessPara._proRealDx = 5;
+  calibProjProcessPara._proRealDy = 0;
+  calibProjProcessPara._proCbDx = 23;
+  calibProjProcessPara._proCbDy = 31;
+  calibProjProcessPara._proResolution = cv::Size(1280, 720);
+
+  for (uint8_t i = 0; i < calibProjProcessPara._proCamCorners[0].rows *
+                            calibProjProcessPara._proCamCorners[0].cols;
+       i++) {
+    qDebug() << "Cal corners2 x" << i
+             << calibProjProcessPara._proCamCorners[0].at<cv::Vec2f>(i, 0)[0];
+    qDebug() << "Cal corners2 y" << i
+             << calibProjProcessPara._proCamCorners[0].at<cv::Vec2f>(i, 0)[1];
+  }
+
+  _algo.projector_calib(calibProjProcessPara);
+
+  GaoCeWrapper* myWrapper = dynamic_cast<GaoCeWrapper*>(&_algo);
+
+  double Err =
+    myWrapper->_gaoce->_calibProjResult._proReprojErr.at<double>(0, 0);
+  _error.setText(QString::number(Err, 'f', 2));
+  QMessageBox MBox;
+  MBox.setWindowTitle("提示");
+  MBox.setText("标定投影仪成功");
+  MBox.exec();
 }

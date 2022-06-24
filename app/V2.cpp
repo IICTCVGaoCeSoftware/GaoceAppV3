@@ -59,13 +59,13 @@
 //   std::cout << _transformDepthImageParam._externalProjParamMat << std::endl;
 //   std::cout << _transformDepthImageParam._internalProjParamMat << std::endl;
 //   std::cout << _transformDepthImageParam._scaleDepth;
-//   convertToDepthImage(cloud,
-//                       _transformDepthImageParam._externalProjParamMat,
-//                       _transformDepthImageParam._internalProjParamMat,
-//                       _transformDepthImageParam._depthImageSize.height,
-//                       _transformDepthImageParam._depthImageSize.width,
-//                       100,
-//                       depthImage);
+//   //  convertToDepthImage(cloud,
+//   //                      _transformDepthImageParam._externalProjParamMat,
+//   //                      _transformDepthImageParam._internalProjParamMat,
+//   //                      _transformDepthImageParam._depthImageSize.height,
+//   //                      _transformDepthImageParam._depthImageSize.width,
+//   //                      100,
+//   //                      depthImage);
 
 //  std::vector<int> compression_params;
 //  compression_params.push_back(cv::IMWRITE_PNG_COMPRESSION);
@@ -120,6 +120,8 @@
 //   _calibCamResult._camExMatrix = calibCamResultReturn._camExMatrix;
 //   _calibCamResult._camInMatrix = calibCamResultReturn._camInMatrix;
 //   _calibCamResult._camReprojErr = calibCamResultReturn._camReprojErr;
+//   qDebug() << "the adds is" << &_calibCamResult;
+//   auto p2 = &_calibCamResult;
 
 //  //对数据结构体赋值
 
@@ -132,6 +134,7 @@
 //  _paramInfoCollectStructure._internalCamParamMat = camInMatrix32.clone();
 //  _paramInfoCollectStructure._camDistortion.release();
 //  _paramInfoCollectStructure._camDistortion = camDistortion32.clone();
+//  double Err1 = _calibCamResult._camReprojErr.at<double>(0, 0);
 //}
 
 // void
@@ -171,8 +174,6 @@
 //  // void compute_fine_corners(cv::Mat & , int , int );
 //  int pixelsDx = 10;
 //  int pixelsDy = 10;
-//  //  calib_3D::compute_fine_corners(
-//  //    cornersCoarse, pixelsDx, pixelsDy, *proCamCorners);
 //}
 
 // void
@@ -367,7 +368,12 @@
 // std::unique_ptr<GaoCe>
 // create_v2()
 //{
+<<<<<<< HEAD
 //   return std::unique_ptr<V2>(new V2());
+=======
+//   return std::make_unique<V2>();
+//   // return std::unique_ptr<V2>(new V2());
+>>>>>>> 1740259 (算法测试跑通)
 // }
 // }
 

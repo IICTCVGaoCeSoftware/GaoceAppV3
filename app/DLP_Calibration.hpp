@@ -32,9 +32,9 @@ public:
 
 private:
   GaoCe::GaoCe& _algo;
-  GaoCe::CalibProjProcessParam _param;
+  GaoCe::CalibProjProcessParam calibProjProcessPara;
   QWidget _leftWidget;
-  QStackedLayout _leftLayout;
+  QVBoxLayout _leftLayout;
   esd::QuadrangleSelector _inputBench;
   esd::ImageBench _bench;
   QLabel _imageNum, _chessNum, _initOffset, _chessDis, _errorShow, _cornerPoint;
@@ -43,12 +43,18 @@ private:
   QSpinBox _rowSize, _colSize, _horiDis, _verDis;
   QLineEdit _reso1, _reso2;
   QPushButton _refreshButton, _calButton, _reCalButton;
-  QPushButton _selPoint, _noSelPoint;
+  QPushButton _selPoint, _noSelPoint, _excCorner;
   QLineEdit _error;
+  cv::Mat proImgCorners; //输出的投影棋盘格角点
+  cv::Mat proCamCorners; //精细化的打印角点
+  cv::Mat image;
+  QLabel _current;
+
   int temp = 1;
 
 private slots:
   void on_refresh_clicked();
-  //  void on_selPoint_clicked();
+  void on_selPoint_clicked();
   void on_calButton_clicked();
+  void on_excCorner_clicked();
 };

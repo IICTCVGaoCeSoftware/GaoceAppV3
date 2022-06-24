@@ -68,6 +68,7 @@
 //    float _scaleDepth;
 //  };
 //  ParamInfoCollectStructure _paramInfoCollectStructure;
+
 //  // GaoCe interface
 // private:
 //  esb::Profiler _profiler;

@@ -1,4 +1,5 @@
 #include "PatternCoding.hpp"
+#include "wrapper.hpp"
 
 PatternCoding::PatternCoding(GaoCe::GaoCe& algo, QWidget* parent)
   : _S(parent)
@@ -60,6 +61,6 @@ PatternCoding::PatternCoding(GaoCe::GaoCe& algo, QWidget* parent)
 void
 PatternCoding::on_calButton_clicked()
 {
-  //_algo.rays_palnes()
-  _algo.rays_palnes(&_algo._calibOutputParam);
+  GaoCeWrapper* myWrapper = dynamic_cast<GaoCeWrapper*>(&_algo);
+  _algo.rays_palnes(&myWrapper->_gaoce->_calibOutputParam);
 }
