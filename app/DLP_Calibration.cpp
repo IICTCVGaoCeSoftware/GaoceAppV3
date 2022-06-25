@@ -19,10 +19,10 @@ DLP_Calibration::DLP_Calibration(GaoCe::GaoCe& algo, QWidget* parent)
   _chessNum.setText("棋盘格个数");
   _rowSize.setPrefix("行方向 ");
   _rowSize.setValue(5);
-  _rowSize.setSuffix(" mm");
+  _rowSize.setSuffix(" 像素");
   _colSize.setPrefix("列方向 ");
   _colSize.setValue(0);
-  _colSize.setSuffix(" mm");
+  _colSize.setSuffix(" 像素");
   _horiDis.setPrefix("水平间距 ");
   _horiDis.setValue(31);
   _horiDis.setSuffix(" mm");
@@ -41,9 +41,19 @@ DLP_Calibration::DLP_Calibration(GaoCe::GaoCe& algo, QWidget* parent)
   _resolution.setText("投影分辨率");
   _multi.setText("×");
   _current.setText("当前选取图片" + QString::number(temp));
+  _insertMatrix.setText("Mask矩阵");
+  _maskRow.setPrefix("行");
+  _maskCol.setPrefix("列");
+  _insertMask.setText("插入");
   _excCorner.setText("提取角点");
 
-  //  proCamAllCornersCoarse = read_matlab(); //所有的粗角点
+  // 初始化角点图
+  cv::Mat img1(720, 1280, CV_8UC1, cv::Scalar(0));
+  _showICorner = img1;
+  cv::Mat img2(720, 1280, CV_8UC1, cv::Scalar(0));
+  _showPCorner = img2;
+  _showImgCorner.display(_showICorner);
+  _showProCorner.display(_showPCorner);
 
   // 布局界面
   _leftLayout.addWidget(&_inputBench);
@@ -51,6 +61,8 @@ DLP_Calibration::DLP_Calibration(GaoCe::GaoCe& algo, QWidget* parent)
 
   // 右边的垂直界面
   auto vlayout = new QVBoxLayout();
+  vlayout->addWidget(&_showImgCorner);
+  vlayout->addWidget(&_showProCorner);
   vlayout->addStretch();
   vlayout->addWidget(&_imageNum);
   vlayout->addWidget(&_imageSpin);
@@ -88,6 +100,18 @@ DLP_Calibration::DLP_Calibration(GaoCe::GaoCe& algo, QWidget* parent)
   // 刷新输入
   vlayout->addWidget(&_refreshButton);
 
+  // 插入Mask矩阵
+  vlayout->addWidget(&_insertMatrix);
+  auto masklayout = new QHBoxLayout();
+  masklayout->addWidget(&_maskRow);
+  masklayout->addWidget(&_maskCol);
+  masklayout->addWidget(&_insertMask);
+  vlayout->addLayout(masklayout);
+  vlayout->addWidget(&_mask);
+  _mask.horizontalHeader()->setVisible(false);
+  _mask.verticalHeader()->setVisible(false);
+  _mask.hide();
+
   // 提取角点
   vlayout->addWidget(&_excCorner);
 
@@ -123,18 +147,21 @@ DLP_Calibration::DLP_Calibration(GaoCe::GaoCe& algo, QWidget* parent)
   connect(&_calButton, &QPushButton::clicked, this, &_T::on_calButton_clicked);
   connect(&_selPoint, &QPushButton::clicked, this, &_T::on_selPoint_clicked);
   connect(&_excCorner, &QPushButton::clicked, this, &_T::on_excCorner_clicked);
+  connect(
+    &_insertMask, &QPushButton::clicked, this, &_T::on_insertMask_clicked);
 }
 
 void
 DLP_Calibration::on_refresh_clicked()
 {
-  _current.setText("当前选取图片" + QString::number(temp));
+  _current.setText("当前选取图片" + QString::number(temp++));
 
-  QString str = "D:/IICT/DLPPattern/images/projector/P";
-  QString s = QString::number(temp++);
-  str = str + s;
-  str += ".bmp";
-  image = cv::imread(str.toStdString());
+  //  QString str = "D:/IICT/DLPPattern/images/projector/P";
+  //  QString s = QString::number(temp++);
+  //  str = str + s;
+  //  str += ".bmp";
+  //  image = cv::imread(str.toStdString());
+  cv::Mat image = _getInput();
 
   _inputBench.display(image);
   _refreshButton.setEnabled(false);
@@ -202,14 +229,16 @@ DLP_Calibration::on_selPoint_clicked()
   _refreshButton.setEnabled(true);
   _excCorner.setEnabled(true);
 
-  for (uint8_t i = 0; i < calibProjProcessPara._proCamCorners[0].rows *
-                            calibProjProcessPara._proCamCorners[0].cols;
-       i++) {
-    qDebug() << "Sel corners2 x" << i
-             << calibProjProcessPara._proCamCorners[0].at<cv::Vec2f>(i, 0)[0];
-    qDebug() << "Sel corners2 y" << i
-             << calibProjProcessPara._proCamCorners[0].at<cv::Vec2f>(i, 0)[1];
-  }
+  //  for (uint8_t i = 0; i < calibProjProcessPara._proCamCorners[0].rows *
+  //                            calibProjProcessPara._proCamCorners[0].cols;
+  //       i++) {
+  //    qDebug() << "Sel corners2 x" << i
+  //             << calibProjProcessPara._proCamCorners[0].at<cv::Vec2f>(i,
+  //             0)[0];
+  //    qDebug() << "Sel corners2 y" << i
+  //             << calibProjProcessPara._proCamCorners[0].at<cv::Vec2f>(i,
+  //             0)[1];
+  //  }
 }
 
 void
@@ -241,4 +270,15 @@ DLP_Calibration::on_calButton_clicked()
   MBox.setWindowTitle("提示");
   MBox.setText("标定投影仪成功");
   MBox.exec();
+}
+
+void
+DLP_Calibration::on_insertMask_clicked()
+{
+
+  _mask.setRowCount(_maskRow.value());
+  _mask.setColumnCount(_maskCol.value());
+  _mask.horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
+  _mask.verticalHeader()->setSectionResizeMode(QHeaderView::Stretch);
+  _mask.show();
 }

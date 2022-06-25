@@ -6,7 +6,7 @@ if(NOT _env_cmake_found)
 endif()
 unset(_env_cmake_found)
 
-project(GaoCeAppV3 VERSION 0.0.0.0)
+project(GaoCeAppV3 VERSION 1.3.0.0)
 
 include(deps.cmake)
 

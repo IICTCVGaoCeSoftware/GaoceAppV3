@@ -368,12 +368,9 @@
 // std::unique_ptr<GaoCe>
 // create_v2()
 //{
-<<<<<<< HEAD
-//   return std::unique_ptr<V2>(new V2());
-=======
+
 //   return std::make_unique<V2>();
 //   // return std::unique_ptr<V2>(new V2());
->>>>>>> 1740259 (算法测试跑通)
 // }
 // }
 

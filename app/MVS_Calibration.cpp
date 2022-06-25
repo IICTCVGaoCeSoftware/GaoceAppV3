@@ -35,6 +35,11 @@ MVS_Calibration::MVS_Calibration(GaoCe::GaoCe& algo, QWidget* parent)
   _errorShow.setText("重投影误差显示");
   _current.setText("当前选取图片" + QString::number(temp));
 
+  // 初始化角点图
+  cv::Mat img1(720, 1280, CV_8UC1, cv::Scalar(0));
+  _showICorner = img1;
+  _showImgCorner.display(_showICorner);
+
   // 布局界面
   _leftLayout.addWidget(&_bench);
   _leftLayout.addWidget(&_current);
@@ -100,38 +105,28 @@ MVS_Calibration::MVS_Calibration(GaoCe::GaoCe& algo, QWidget* parent)
 void
 MVS_Calibration::on_refresh_clicked()
 {
-<<<<<<< HEAD
-  QString str = "E://projects//EXP//images//images//C";
-=======
-  _current.setText("当前选取图片" + QString::number(temp));
+  _current.setText("当前选取图片" + QString::number(temp++));
 
-  QString str = "D:/IICT/DLPPattern/images/camera/C";
+  //  QString str = "D:/IICT/DLPPattern/images/camera/C";
 
->>>>>>> 1740259 (算法测试跑通)
-  QString s = QString::number(temp++);
-  str = str + s;
-  str += ".bmp";
-  cv::Mat image = cv::imread(str.toStdString());
-<<<<<<< HEAD
-  _bench.display(image);
-  cv::Size camPatternSize = cv::Size(11, 6);
-  // cv::Size2i num(_rowNumSpin.text().toInt(), _colNumSpin.text().toInt());
-  _algo.find_camcorners(image, camPatternSize, &result);
-  cv::Point2d p(result.at<double>(0), result.at<double>(1));
-  qDebug() << p.x << " " << p.y;
-=======
+  //  QString s = QString::number(temp++);
+  //  str = str + s;
+  //  str += ".bmp";
+  //  cv::Mat image = cv::imread(str.toStdString());
+  cv::Mat image = _getInput();
   cv::Size camPatternSize = cv::Size(11, 6);
   cv::Mat imgCamGray;
   cv::cvtColor(image, imgCamGray, cv::COLOR_BGR2GRAY);
   _algo.find_camcorners(imgCamGray, camPatternSize, &camCorners);
   std::vector<cv::Point2f> imagecorner = cv::Mat_<cv::Point2f>(camCorners);
 
+  // 输出所有的角点到屏幕上
   for (uint8_t i = 0; i < imagecorner.size(); i++) {
     circle(image, imagecorner[i], 10, cv::Scalar(0, 0, 255), 5);
   }
+
   _bench.display(image);
   _refreshButton.setEnabled(false);
->>>>>>> 1740259 (算法测试跑通)
 }
 
 void
@@ -168,7 +163,7 @@ MVS_Calibration::on_calButton_clicked()
   qDebug() << "outside add is:" << &_algo._calibCamResult;
 
   // cv::Mat temp1 = _algo._calibCamResult._camInMatrix;
-  cv::Mat temp = _algo._calibCamResult._camReprojErr;
+  //  cv::Mat temp = _algo._calibCamResult._camReprojErr;
 
   // double Err = _algo._calibCamResult._camReprojErr.at<double>(0, 0);
   double Err1 =

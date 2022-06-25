@@ -52,13 +52,15 @@ private:
   esd::Monitor _camera;
   QWidget* _widget1;
   QTimer _timer;
-  QPushButton _reconOnce, _reconContinue, _reconStop, _savePCL, _saveDeepImg;
+  QPushButton _reconOnce, _reconContinue, _reconStop, _savePCD, _savePLY,
+    _saveDeepImg;
   QVTKOpenGLNativeWidget _pointCloud;
   QCheckBox _showCamera, _showDeepImg;
+  QComboBox _selShow;
+
   pcl::PointCloud<pcl::PointXYZ> cloud;
   pcl::PointCloud<pcl::PointXYZ>::Ptr cloud2;
   cv::Mat transform_depth_image;
-
   boost::shared_ptr<pcl::visualization::PCLVisualizer> _viewer111;
   esd::ImageLabel _deepImg;
 
@@ -72,7 +74,12 @@ private slots:
   void on_reconOnce_clicked();
   void on_reconContinue_clicked();
   void on_reconStop_clicked();
-  void on_savePCL_clicked();
+  void on_savePCD_clicked();
+  void on_savePLY_clicked();
   void on_saveDeepImg_clicked();
   void on_showDeepImg_checked();
+
+public:
+  void disable_all();
+  void enable_all();
 };

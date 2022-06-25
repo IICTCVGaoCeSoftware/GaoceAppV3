@@ -16,53 +16,26 @@ ReConstructWindow::ReConstructWindow(GaoCe::GaoCe& algo, QWidget* parent)
   _reconContinue.setText("连续重建");
   _reconOnce.setText("重建一次");
   _reconStop.setText("结束");
-  _savePCL.setText("保存点云");
+  _savePCD.setText("保存为PCD");
+  _savePLY.setText("保存为PLY");
   _saveDeepImg.setText("保存深度图");
   _showCamera.setText("显示相机画面");
   _showCamera.setChecked(true);
   _showDeepImg.setText("显示深度图像");
   _showDeepImg.setChecked(true);
-
-  //   cloud.reset(new pcl::PointCloud<pcl::PointXYZ>);
-  // cloud.reset(new pcl::PointCloud<pcl::PointXYZRGB>);
-  //  QString filename = "G:/bun_zipper.ply";
-
-  //  //读取文件
-  //  vtkSmartPointer<vtkPLYReader> reader =
-  //  vtkSmartPointer<vtkPLYReader>::New();
-
-  //  reader->SetFileName(filename.toStdString().c_str());
-  //  reader->Update();
-
-  //  //将source转换成mapper
-  //  vtkSmartPointer<vtkPolyDataMapper> mapper =
-  //    vtkSmartPointer<vtkPolyDataMapper>::New();
-  //  mapper->SetInputConnection(reader->GetOutputPort());
-
-  //  //送入渲染引擎进行显示
-  //  vtkSmartPointer<vtkActor> actor = vtkSmartPointer<vtkActor>::New();
-  //  actor->SetMapper(mapper);
-
-  //  //渲染
-  //  vtkSmartPointer<vtkRenderer> renderer =
-  //  vtkSmartPointer<vtkRenderer>::New(); renderer->AddActor(actor);
-  //  renderer->SetBackground(.0, .0, .0);
-  //  _camera.display_qstring("sssssssss");
-
-  //  //设置渲染窗口
-  //  vtkSmartPointer<vtkGenericOpenGLRenderWindow> window =
-  //    vtkSmartPointer<vtkGenericOpenGLRenderWindow>::New();
-  //  window->AddRenderer(renderer);
-
-  //  _pointCloud.SetRenderWindow(window);
+  _selShow.addItem("请选择重构对象");
+  _selShow.addItem("构建点云");
+  _selShow.addItem("构建深度图");
 
   auto vlayout = new QVBoxLayout();
+  vlayout->addWidget(&_selShow);
   vlayout->addWidget(&_reconOnce);
   vlayout->addWidget(&_reconContinue);
   vlayout->addWidget(&_reconStop);
   vlayout->addWidget(&_showCamera);
   vlayout->addWidget(&_showDeepImg);
-  vlayout->addWidget(&_savePCL);
+  vlayout->addWidget(&_savePCD);
+  vlayout->addWidget(&_savePLY);
   vlayout->addWidget(&_saveDeepImg);
 
   auto layout = new QVBoxLayout();
@@ -83,6 +56,8 @@ ReConstructWindow::ReConstructWindow(GaoCe::GaoCe& algo, QWidget* parent)
 
   setLayout(finalLayout);
 
+  disable_all();
+
   // 连接信号
   connect(&_reconOnce, &QPushButton::clicked, this, &_T::on_reconOnce_clicked);
   connect(&_reconContinue,
@@ -90,7 +65,9 @@ ReConstructWindow::ReConstructWindow(GaoCe::GaoCe& algo, QWidget* parent)
           this,
           &_T::on_reconContinue_clicked);
   connect(&_reconStop, &QPushButton::clicked, this, &_T::on_reconStop_clicked);
-  connect(&_savePCL, &QPushButton::clicked, this, &_T::on_savePCL_clicked);
+  connect(&_savePCD, &QPushButton::clicked, this, &_T::on_savePCD_clicked);
+  connect(&_savePLY, &QPushButton::clicked, this, &_T::on_savePLY_clicked);
+
   connect(
     &_saveDeepImg, &QPushButton::clicked, this, &_T::on_saveDeepImg_clicked);
 
@@ -219,12 +196,29 @@ ReConstructWindow::on_reconStop_clicked()
 {}
 
 void
-ReConstructWindow::on_savePCL_clicked()
-{}
+ReConstructWindow::on_savePCD_clicked()
+{
+  QString filename = QFileDialog::getSaveFileName(this, "保存PCD", "*.pcd");
+  QFile file(filename);                       //创建文件对象
+  pcl::io::savePCDFile(filename.toStdString(), cloud);
+}
+
+void
+ReConstructWindow::on_savePLY_clicked()
+{
+  QString filename = QFileDialog::getSaveFileName(this, "保存PCD", "*.ply");
+  QFile file(filename); //创建文件对象
+  pcl::io::savePLYFile(filename.toStdString(), cloud);
+}
 
 void
 ReConstructWindow::on_saveDeepImg_clicked()
-{}
+{
+  // TODO
+  QString filename =
+    QFileDialog::getSaveFileName(this, "保存深度图像", "*.ply");
+  QFile file(filename);
+}
 
 void
 ReConstructWindow::on_showDeepImg_checked()
@@ -237,4 +231,24 @@ ReConstructWindow::on_showDeepImg_checked()
   //    std::ofstream profile("E:/projects/EXP/log/profile.log");
   //  profile << gProfiler << std::endl;
   //  profile.close();
+}
+
+void
+ReConstructWindow::disable_all()
+{
+  _reconOnce.setEnabled(false);
+  _reconStop.setEnabled(false);
+  _savePCD.setEnabled(false);
+  _savePLY.setEnabled(false);
+  _saveDeepImg.setEnabled(false);
+}
+
+void
+ReConstructWindow::enable_all()
+{
+  _reconOnce.setEnabled(true);
+  _reconStop.setEnabled(true);
+  _savePCD.setEnabled(true);
+  _savePLY.setEnabled(true);
+  _saveDeepImg.setEnabled(true);
 }

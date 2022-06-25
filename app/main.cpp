@@ -6,17 +6,6 @@
 int
 main(int argc, char* argv[])
 {
-<<<<<<< HEAD
-  auto test = GaoCe::create_v1();
-  cv::Mat image = cv::imread("E:/C1.bmp");
-  // cv::Mat image;
-  cv::Size camImgSize = cv::Size(2592, 2048);
-  cv::Mat imgCamGray;
-  cv::cvtColor(image, imgCamGray, cv::COLOR_BGR2GRAY);
-  cv::Mat result;
-  test->find_camcorners(imgCamGray, camImgSize, &result);
-  cv::imwrite("D:/result.png", result);
-=======
   esf::Application app(argc, argv);
   app.setApplicationName("高测系统V3 (v" GaoCeAppV3_VERSION ")");
 
@@ -74,8 +63,10 @@ main(int argc, char* argv[])
   //  app.reg_sub_ui(_dlpUi);
 
   GaoCeConfigSubUi _cSubUi{ *worker };
+  {
+    _cSubUi._MVScal._getInput = _cSubUi._DLPcal._getInput = getInput;
+  }
   app.reg_sub_ui(_cSubUi);
 
   return app.exec();
->>>>>>> 1740259 (算法测试跑通)
 }
