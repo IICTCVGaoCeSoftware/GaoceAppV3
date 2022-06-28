@@ -46,6 +46,15 @@ DLP_Calibration::DLP_Calibration(GaoCe::GaoCe& algo, QWidget* parent)
   _maskCol.setPrefix("列");
   _insertMask.setText("插入");
   _excCorner.setText("提取角点");
+  _showMask.setText("显示Mask矩阵");
+  _showMask.setChecked(false);
+
+  // 逻辑禁用关系
+  _calButton.setEnabled(false);
+  _reCalButton.setEnabled(false);
+  _selPoint.setEnabled(false);
+  _noSelPoint.setEnabled(false);
+  _excCorner.setEnabled(false);
 
   // 初始化角点图
   cv::Mat img1(720, 1280, CV_8UC1, cv::Scalar(0));
@@ -61,6 +70,7 @@ DLP_Calibration::DLP_Calibration(GaoCe::GaoCe& algo, QWidget* parent)
 
   // 右边的垂直界面
   auto vlayout = new QVBoxLayout();
+  vlayout->addWidget(&_showMask);
   vlayout->addWidget(&_showImgCorner);
   vlayout->addWidget(&_showProCorner);
   vlayout->addStretch();
@@ -151,20 +161,52 @@ DLP_Calibration::DLP_Calibration(GaoCe::GaoCe& algo, QWidget* parent)
     &_insertMask, &QPushButton::clicked, this, &_T::on_insertMask_clicked);
 }
 
+// 测试图像用
+// void
+// DLP_Calibration::on_refresh_clicked()
+//{
+//  cv::Mat image = _getInput();
+//  if (image.empty()) {
+//    QMessageBox MBox;
+//    MBox.setWindowTitle("警告");
+//    MBox.setText("相机未抓取到图片");
+//    MBox.exec();
+//    return;
+//  }
+//  _current.setText("当前选取图片" + QString::number(temp++));
+//  _inputBench.display(image);
+//  _refreshButton.setEnabled(false);
+//_excCorner.setEnabled(true);
+
+//  //  QString str = "D:/IICT/DLPPattern/images/projector/P";
+//  //  QString s = QString::number(temp++);
+//  //  str = str + s;
+//  //  str += ".bmp";
+//  //  image = cv::imread(str.toStdString());
+//}
+
+// 相机测试用
 void
 DLP_Calibration::on_refresh_clicked()
 {
-  _current.setText("当前选取图片" + QString::number(temp++));
+  _current.setText("当前选取图片" + QString::number(temp));
 
-  //  QString str = "D:/IICT/DLPPattern/images/projector/P";
-  //  QString s = QString::number(temp++);
-  //  str = str + s;
-  //  str += ".bmp";
-  //  image = cv::imread(str.toStdString());
-  cv::Mat image = _getInput();
+  QString str = "D:/IICT/DLPPattern/images/projector/P";
+  QString s = QString::number(temp++);
+  str = str + s;
+  str += ".bmp";
+  image = cv::imread(str.toStdString());
+  if (image.empty()) {
+    QMessageBox MBox;
+    MBox.setWindowTitle("警告");
+    MBox.setText("相机未抓取到图片");
+    MBox.exec();
+    return;
+  }
 
   _inputBench.display(image);
   _refreshButton.setEnabled(false);
+  _excCorner.setEnabled(true);
 }
 
 void
@@ -212,6 +254,8 @@ DLP_Calibration::on_excCorner_clicked()
   }
 
   _excCorner.setEnabled(false);
+  _selPoint.setEnabled(true);
+  _noSelPoint.setEnabled(true);
   _inputBench.display(image);
 }
 
@@ -228,6 +272,9 @@ DLP_Calibration::on_selPoint_clicked()
   MBox.exec();
   _refreshButton.setEnabled(true);
   _excCorner.setEnabled(true);
+  _selPoint.setEnabled(false);
+  _noSelPoint.setEnabled(false);
+  _excCorner.setEnabled(false);
 
   //  for (uint8_t i = 0; i < calibProjProcessPara._proCamCorners[0].rows *
   //                            calibProjProcessPara._proCamCorners[0].cols;
@@ -275,10 +322,10 @@ DLP_Calibration::on_calButton_clicked()
 void
 DLP_Calibration::on_insertMask_clicked()
 {
-
   _mask.setRowCount(_maskRow.value());
   _mask.setColumnCount(_maskCol.value());
-  _mask.horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
   _mask.verticalHeader()->setSectionResizeMode(QHeaderView::Stretch);
+  _mask.horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
+  _mask.verticalHeader()->setDefaultSectionSize(5);
   _mask.show();
 }

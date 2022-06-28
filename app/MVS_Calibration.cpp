@@ -12,7 +12,7 @@ MVS_Calibration::MVS_Calibration(GaoCe::GaoCe& algo, QWidget* parent)
   , _calButton("标定相机")
   , _reCalButton("重新标定")
 {
-  // 配置组件
+  // 组件初始化
   _imageSpin.setPrefix("采集图像 ");
   _imageSpin.setValue(15);
   _imageSpin.setSuffix(" 张");
@@ -34,6 +34,12 @@ MVS_Calibration::MVS_Calibration(GaoCe::GaoCe& algo, QWidget* parent)
   _noSelPoint.setText("×");
   _errorShow.setText("重投影误差显示");
   _current.setText("当前选取图片" + QString::number(temp));
+
+  // 组件逻辑禁用
+  _calButton.setEnabled(false);
+  _reCalButton.setEnabled(false);
+  _selPoint.setEnabled(false);
+  _noSelPoint.setEnabled(false);
 
   // 初始化角点图
   cv::Mat img1(720, 1280, CV_8UC1, cv::Scalar(0));
@@ -102,19 +108,67 @@ MVS_Calibration::MVS_Calibration(GaoCe::GaoCe& algo, QWidget* parent)
   connect(&_calButton, &QPushButton::clicked, this, &_T::on_calButton_clicked);
 }
 
+// 相机用
+// void
+// MVS_Calibration::on_refresh_clicked()
+//{
+//  QString str = "D:/IICT/DLPPattern/images/camera/C";
+//  QString s = QString::number(temp++);
+//  str = str + s;
+//  str += ".bmp";
+//  cv::Mat image = cv::imread(str.toStdString());
+//  //  auto image = _getInput();
+//  if (image.empty()) {
+//    QMessageBox MBox;
+//    MBox.setWindowTitle("警告");
+//    MBox.setText("相机未抓取到图片");
+//    MBox.exec();
+//    return;
+//  }
+//  _current.setText("当前选取图片" + QString::number(temp++));
+//  auto row = _rowNumSpin.value();
+//  auto col = _colNumSpin.value();
+//  cv::Size camPatternSize = cv::Size(row, col);
+//  cv::Mat imgCamBGR;
+
+//  _algo.find_camcorners(image, camPatternSize, &camCorners);
+//  std::vector<cv::Point2f> imagecorner = cv::Mat_<cv::Point2f>(camCorners);
+
+//  // 转换为三通道图片，角点标注才有颜色
+//  cv::cvtColor(image, imgCamBGR, cv::COLOR_GRAY2BGR);
+
+//  // 输出所有的角点到屏幕上
+//  for (uint8_t i = 0; i < imagecorner.size(); i++) {
+//    circle(imgCamBGR, imagecorner[i], 10, cv::Scalar(0, 0, 255), 5);
+//  }
+//  _bench.display(imgCamBGR);
+//  _refreshButton.setEnabled(false);
+//  _calButton.setEnabled(true);
+//  _selPoint.setEnabled(true);
+//  _noSelPoint.setEnabled(true);
+//}
+
+// 测试图像用
 void
 MVS_Calibration::on_refresh_clicked()
 {
+  QString str = "D:/IICT/DLPPattern/images/camera/C";
+  QString s = QString::number(temp++);
+  str = str + s;
+  str += ".bmp";
+  cv::Mat image = cv::imread(str.toStdString());
+  //  auto image = _getInput();
+  if (image.empty()) {
+    QMessageBox MBox;
+    MBox.setWindowTitle("警告");
+    MBox.setText("相机未抓取到图片");
+    MBox.exec();
+    return;
+  }
   _current.setText("当前选取图片" + QString::number(temp++));
-
-  //  QString str = "D:/IICT/DLPPattern/images/camera/C";
-
-  //  QString s = QString::number(temp++);
-  //  str = str + s;
-  //  str += ".bmp";
-  //  cv::Mat image = cv::imread(str.toStdString());
-  cv::Mat image = _getInput();
-  cv::Size camPatternSize = cv::Size(11, 6);
+  auto row = _rowNumSpin.value();
+  auto col = _colNumSpin.value();
+  cv::Size camPatternSize = cv::Size(row + 1, col);
   cv::Mat imgCamGray;
   cv::cvtColor(image, imgCamGray, cv::COLOR_BGR2GRAY);
   _algo.find_camcorners(imgCamGray, camPatternSize, &camCorners);
@@ -124,15 +178,18 @@ MVS_Calibration::on_refresh_clicked()
   for (uint8_t i = 0; i < imagecorner.size(); i++) {
     circle(image, imagecorner[i], 10, cv::Scalar(0, 0, 255), 5);
   }
-
   _bench.display(image);
   _refreshButton.setEnabled(false);
+  _selPoint.setEnabled(true);
+  _noSelPoint.setEnabled(true);
 }
 
 void
 MVS_Calibration::on_selPoint_clicked()
 {
-  cv::Size camPatternSize = cv::Size(11, 6);
+  auto row = _rowNumSpin.value();
+  auto col = _colNumSpin.value();
+  cv::Size camPatternSize = cv::Size(row + 1, col);
   calibCamProcessParam._camCornersMat.push_back(camCorners);
   calibCamProcessParam._camPatternSize.push_back(camPatternSize);
   QMessageBox MBox;
@@ -140,6 +197,10 @@ MVS_Calibration::on_selPoint_clicked()
   MBox.setText("提取角点成功");
   MBox.exec();
   _refreshButton.setEnabled(true);
+  _selPoint.setEnabled(false);
+  _noSelPoint.setEnabled(false);
+  _calButton.setEnabled(true);
+  _reCalButton.setEnabled(true);
 }
 
 void
@@ -162,10 +223,6 @@ MVS_Calibration::on_calButton_clicked()
 
   qDebug() << "outside add is:" << &_algo._calibCamResult;
 
-  // cv::Mat temp1 = _algo._calibCamResult._camInMatrix;
-  //  cv::Mat temp = _algo._calibCamResult._camReprojErr;
-
-  // double Err = _algo._calibCamResult._camReprojErr.at<double>(0, 0);
   double Err1 =
     myWrapper->_gaoce->_calibCamResult._camReprojErr.at<double>(0, 0);
 

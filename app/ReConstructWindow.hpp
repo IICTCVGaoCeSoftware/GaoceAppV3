@@ -46,9 +46,7 @@ public:
   ReConstructWindow(GaoCe::GaoCe& algo, QWidget* parent = nullptr);
 
 private:
-  void initialVtkWidget();
   GaoCe::GaoCe& _algo;
-  // esd::ImageLabel _camera;
   esd::Monitor _camera;
   QWidget* _widget1;
   QTimer _timer;
@@ -68,7 +66,8 @@ private slots:
   // 配置界面的电源键控制监视定时器的启动和停止
   // void when_configMonitor_powerClicked(bool power);
   // 当 _timer 计时结束时取帧刷新到界面上
-  // void when_timer_timeout();
+  void when_timer_timeout();
+
   void onStateChanged(int state);
   void onStateChanged1(int state);
   void on_reconOnce_clicked();
@@ -80,6 +79,7 @@ private slots:
   void on_showDeepImg_checked();
 
 public:
+  void initialVtkWidget();
   void disable_all();
   void enable_all();
 };

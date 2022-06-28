@@ -76,6 +76,12 @@ ReConstructWindow::ReConstructWindow(GaoCe::GaoCe& algo, QWidget* parent)
 
   connect(
     &_showDeepImg, SIGNAL(stateChanged(int)), this, SLOT(onStateChanged1(int)));
+
+  connect(&_selShow, &QComboBox::currentIndexChanged, this, &_T::enable_all);
+
+  connect(&_timer, &QTimer::timeout, this, &_T::when_timer_timeout);
+
+  _timer.start(50);
 }
 
 void
@@ -198,6 +204,13 @@ ReConstructWindow::on_reconStop_clicked()
 void
 ReConstructWindow::on_savePCD_clicked()
 {
+  if (cloud.empty()) {
+    QMessageBox MBox;
+    MBox.setWindowTitle("提示");
+    MBox.setText("点云为空，无法保存");
+    MBox.exec();
+    return;
+  }
   QString filename = QFileDialog::getSaveFileName(this, "保存PCD", "*.pcd");
   QFile file(filename);                       //创建文件对象
   pcl::io::savePCDFile(filename.toStdString(), cloud);
@@ -206,6 +219,13 @@ ReConstructWindow::on_savePCD_clicked()
 void
 ReConstructWindow::on_savePLY_clicked()
 {
+  if (cloud.empty()) {
+    QMessageBox MBox;
+    MBox.setWindowTitle("提示");
+    MBox.setText("点云为空，无法保存");
+    MBox.exec();
+    return;
+  }
   QString filename = QFileDialog::getSaveFileName(this, "保存PCD", "*.ply");
   QFile file(filename); //创建文件对象
   pcl::io::savePLYFile(filename.toStdString(), cloud);
@@ -223,9 +243,7 @@ ReConstructWindow::on_saveDeepImg_clicked()
 void
 ReConstructWindow::on_showDeepImg_checked()
 {
-  //  _algo.transform_depth_image(cloud, &transform_depth_image);
-
-  //  // TODO 显示深度图
+  // TODO 显示深度图
   _deepImg.display_cvmat(transform_depth_image);
 
   //    std::ofstream profile("E:/projects/EXP/log/profile.log");
@@ -234,10 +252,17 @@ ReConstructWindow::on_showDeepImg_checked()
 }
 
 void
+ReConstructWindow::when_timer_timeout()
+{
+  _camera.display_cvmat(_getInput());
+}
+
+void
 ReConstructWindow::disable_all()
 {
   _reconOnce.setEnabled(false);
   _reconStop.setEnabled(false);
+  _reconContinue.setEnabled(false);
   _savePCD.setEnabled(false);
   _savePLY.setEnabled(false);
   _saveDeepImg.setEnabled(false);
@@ -246,9 +271,12 @@ ReConstructWindow::disable_all()
 void
 ReConstructWindow::enable_all()
 {
-  _reconOnce.setEnabled(true);
-  _reconStop.setEnabled(true);
-  _savePCD.setEnabled(true);
-  _savePLY.setEnabled(true);
-  _saveDeepImg.setEnabled(true);
+  if (_selShow.currentIndex() != 0) {
+    _reconOnce.setEnabled(true);
+    _reconStop.setEnabled(true);
+    _reconContinue.setEnabled(true);
+    _savePCD.setEnabled(true);
+    _savePLY.setEnabled(true);
+    _saveDeepImg.setEnabled(true);
+  }
 }

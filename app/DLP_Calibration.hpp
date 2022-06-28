@@ -57,6 +57,7 @@ private:
   esd::ImageLabel _showProCorner;
   cv::Mat _showICorner;
   cv::Mat _showPCorner;
+  QCheckBox _showMask;
   QTableWidget _mask;
 
 private slots:
