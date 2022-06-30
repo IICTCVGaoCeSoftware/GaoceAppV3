@@ -234,10 +234,25 @@ ReConstructWindow::on_savePLY_clicked()
 void
 ReConstructWindow::on_saveDeepImg_clicked()
 {
-  // TODO
+  if (transform_depth_image.empty()) {
+    QMessageBox MBox;
+    MBox.setWindowTitle("提示");
+    MBox.setText("无法保存，请刷新输入");
+    MBox.exec();
+    return;
+  }
   QString filename =
-    QFileDialog::getSaveFileName(this, "保存深度图像", "*.ply");
+    QFileDialog::getSaveFileName(this, "保存深度图像", "*.png");
   QFile file(filename);
+  std::vector<int> compression_params;
+  compression_params.push_back(cv::IMWRITE_PNG_COMPRESSION);
+  compression_params.push_back(0);
+  compression_params.push_back(cv::IMWRITE_PNG_STRATEGY);
+  compression_params.push_back(cv::IMWRITE_PNG_STRATEGY_DEFAULT);
+  if (file.exists()) {
+    cv::imwrite(
+      filename.toStdString(), transform_depth_image, compression_params);
+  }
 }
 
 void

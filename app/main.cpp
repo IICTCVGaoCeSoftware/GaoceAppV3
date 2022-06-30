@@ -10,7 +10,7 @@ main(int argc, char* argv[])
   app.setApplicationName("高测系统V3 (v" GaoCeAppV3_VERSION ")");
 
   es::Gencom::ginit();
-  // es::Com_DLP::ginit();
+  es::Com_DLP::ginit();
   es::Com_MVS::ginit();
   auto worker = new Worker();
   auto wrapper = std::make_unique<GaoCeWrapper>();
@@ -59,12 +59,13 @@ main(int argc, char* argv[])
   es::Com_MVS::MvsCamera::SubUi _mcUi{ worker->_mc, "相机输入" };
   app.reg_sub_ui(_mcUi);
 
-  //  es::Com_DLP::DLP::SubUi _dlpUi{ worker->_dlp, "投影仪" };
-  //  app.reg_sub_ui(_dlpUi);
+  es::Com_DLP::DLP::SubUi _dlpUi{ worker->_dlp, "投影仪" };
+  app.reg_sub_ui(_dlpUi);
 
   GaoCeConfigSubUi _cSubUi{ *worker };
   {
-    _cSubUi._MVScal._getInput = _cSubUi._DLPcal._getInput = getInput;
+    _cSubUi._reConWin._getInput = _cSubUi._MVScal._getInput =
+      _cSubUi._DLPcal._getInput = getInput;
   }
   app.reg_sub_ui(_cSubUi);
 

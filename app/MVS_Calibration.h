@@ -43,19 +43,20 @@ private:
   QSpinBox _imageSpin, _rowNumSpin, _colNumSpin;
   QSpinBox _rowSize, _colSize;
   QPushButton _refreshButton, _calButton, _reCalButton;
-  QPushButton _selPoint, _noSelPoint;
+  QPushButton _selPoint, _noSelPoint, _saveImg;
   QLineEdit _error;
   QDoubleSpinBox _xSize, _ySize;
   QLabel _current;
+  cv::Mat image;
+  cv::Mat saveImg;
   cv::Mat camCorners;
-  cv::Mat result;
   int temp = 1;
-
-  esd::ImageLabel _showImgCorner;
-  cv::Mat _showICorner;
 
 private slots:
   void on_refresh_clicked();
   void on_selPoint_clicked();
+  void on_noSelPoint_clicked();
   void on_calButton_clicked();
+  void on_reCalButton_clicked();
+  void on_saveImg_clicked();
 };
