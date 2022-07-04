@@ -69,6 +69,9 @@ DLP_Calibration::DLP_Calibration(GaoCe::GaoCe& algo, QWidget* parent)
   _noSelPoint.setEnabled(false);
   _excCorner.setEnabled(false);
 
+  _camera.set_power(true);
+  _camera.s_powerClicked(false);
+
   // 默认显示角点分布图
   _showImgCorner.show();
   _projDistri.show();
@@ -91,7 +94,10 @@ DLP_Calibration::DLP_Calibration(GaoCe::GaoCe& algo, QWidget* parent)
   _showCamCorner.display(_showCCorner);
 
   // 布局界面
-  _leftLayout.addWidget(&_inputBench);
+  _leftWidget.setLayout(&_stackLayout);
+  _stackLayout.addWidget(&_camera);
+  _stackLayout.addWidget(&_inputBench);
+  _leftLayout.addWidget(&_leftWidget);
   _leftLayout.addWidget(&_current);
 
   // 右边的垂直界面
@@ -225,33 +231,39 @@ DLP_Calibration::DLP_Calibration(GaoCe::GaoCe& algo, QWidget* parent)
           SIGNAL(buttonClicked(int)),
           this,
           SLOT(handleRadioGroup(int)));
+
+  // 初始化状态
+  _stackLayout.setCurrentIndex(0);
 }
 
+#ifdef USE_CAM
 // 相机测试用
-// void
-// DLP_Calibration::on_refresh_clicked()
-//{
-//  if (temp > _imageSpin.value()) {
-//    QMessageBox MBox;
-//    MBox.setWindowTitle("提示");
-//    MBox.setText("图像数已达上线，请标定或增加图像");
-//    MBox.exec();
-//    return;
-//  }
-//  cv::Mat image = _getInput();
-//  if (image.empty()) {
-//    QMessageBox MBox;
-//    MBox.setWindowTitle("警告");
-//    MBox.setText("相机未抓取到图片");
-//    MBox.exec();
-//    return;
-//  }
-//  _current.setText("当前选取图片" + QString::number(temp++));
-//  _inputBench.display(image);
-//  _refreshButton.setEnabled(false);
-//  _excCorner.setEnabled(true);
-//}
+void
+DLP_Calibration::on_refresh_clicked()
+{
+  if (temp > _imageSpin.value()) {
+    QMessageBox MBox;
+    MBox.setWindowTitle("提示");
+    MBox.setText("图像数已达上线，请标定或增加图像");
+    MBox.exec();
+    return;
+  }
+  cv::Mat image = _getInput();
+  if (image.empty()) {
+    QMessageBox MBox;
+    MBox.setWindowTitle("警告");
+    MBox.setText("相机未抓取到图片");
+    MBox.exec();
+    return;
+  }
+  _current.setText("当前选取图片" + QString::number(temp++));
+  _inputBench.display(image);
+  _stackLayout.setCurrentIndex(1);
+  _refreshButton.setEnabled(false);
+  _excCorner.setEnabled(true);
+}
 
+#else
 // 图像测试用
 void
 DLP_Calibration::on_refresh_clicked()
@@ -281,11 +293,13 @@ DLP_Calibration::on_refresh_clicked()
     return;
   }
   temp++;
-
+  _stackLayout.setCurrentIndex(1);
   _inputBench.display(image);
   _refreshButton.setEnabled(false);
   _excCorner.setEnabled(true);
 }
+
+#endif
 
 void
 DLP_Calibration::on_excCorner_clicked()
@@ -293,6 +307,8 @@ DLP_Calibration::on_excCorner_clicked()
   auto row = _rowNumSpin.value();
   auto col = _colNumSpin.value();
   cv::Size proPatternSize = cv::Size(row, col);
+  cv::Mat imgProGray;
+  cv::cvtColor(image, imgProGray, cv::COLOR_BGR2GRAY);
   // cv::cvtColor(image, imgProGray, cv::COLOR_BGR2GRAY);
 
   cv::Mat proCamCornersCoarse = cv::Mat(4, 1, CV_32FC2);
@@ -316,8 +332,11 @@ DLP_Calibration::on_excCorner_clicked()
   proCamCornersCoarse.at<cv::Vec2f>(2, 0)[1] =
     _inputBench.get_quadrangle()[3].y;
 
-  _algo.find_procorners(
-    image, proCamCornersCoarse, proPatternSize, &proImgCorners, &proCamCorners);
+  _algo.find_procorners(imgProGray,
+                        proCamCornersCoarse,
+                        proPatternSize,
+                        &proImgCorners,
+                        &proCamCorners);
 
   // 没有提取到角点
   if (cv::sum(proImgCorners)[0] == 0 || cv::sum(proCamCorners)[0] == 0) {
@@ -330,7 +349,7 @@ DLP_Calibration::on_excCorner_clicked()
 
   // 转换为三通道图片，角点标注才有颜色
   cv::Mat imgCamBGR;
-  cv::cvtColor(image, imgCamBGR, cv::COLOR_GRAY2BGR);
+  cv::cvtColor(imgProGray, imgCamBGR, cv::COLOR_GRAY2BGR);
 
   std::vector<cv::Point2f> imagecorner = cv::Mat_<cv::Point2f>(proImgCorners);
   std::vector<cv::Point2f> camcorner = cv::Mat_<cv::Point2f>(proCamCorners);
@@ -382,6 +401,7 @@ DLP_Calibration::on_selPoint_clicked()
   }
   _showCamCorner.display_cvmat(_showCCorner);
 
+  _stackLayout.setCurrentIndex(0);
   // 逻辑禁用
   _refreshButton.setEnabled(true);
   _selPoint.setEnabled(false);
@@ -409,6 +429,7 @@ DLP_Calibration::on_noSelPoint_clicked()
   MBox.setWindowTitle("提示");
   MBox.setText("提取角点失败，请重新刷新输入");
   MBox.exec();
+  _stackLayout.setCurrentIndex(0);
   _refreshButton.setEnabled(true);
   _selPoint.setEnabled(false);
   _noSelPoint.setEnabled(false);
@@ -443,6 +464,13 @@ DLP_Calibration::on_calButton_clicked()
   MBox.setWindowTitle("提示");
   MBox.setText("标定投影仪成功");
   MBox.exec();
+
+  // 写入中间文件
+  QString filename = "D:\\temp.txt";
+  QFile file(filename);
+
+  QTextStream stream(&file);
+  stream << _rowSize.value();
 }
 
 void

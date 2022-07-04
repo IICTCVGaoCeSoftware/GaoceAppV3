@@ -4,6 +4,7 @@
 #include "pcl/point_types.h"
 #include <Eyestack/Design/ImageBench.hpp>
 #include <Eyestack/Design/ImageLabel.hpp>
+#include <Eyestack/Design/Monitor.hpp>
 #include <Eyestack/Design/Progressor.hpp>
 #include <Eyestack/Design/QuadrangleSelector.hpp>
 #include <Eyestack/Framework.hpp>
@@ -34,9 +35,12 @@ public:
 
 private:
   GaoCe::GaoCe& _algo;
+  QWidget _leftWidget;
   GaoCe::CalibProjProcessParam calibProjProcessPara;
+  QStackedLayout _stackLayout;
   QVBoxLayout _leftLayout;
   esd::QuadrangleSelector _inputBench;
+  esd::Monitor _camera;
   QLabel _imageNum, _chessNum, _initOffset, _chessDis, _errorShow, _cornerPoint;
   QLabel _resolution, _multi;
   QSpinBox _imageSpin, _rowNumSpin, _colNumSpin, _maskRow, _maskCol;

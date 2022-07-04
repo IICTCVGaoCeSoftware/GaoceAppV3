@@ -42,8 +42,14 @@ MVS_Calibration::MVS_Calibration(GaoCe::GaoCe& algo, QWidget* parent)
   _selPoint.setEnabled(false);
   _noSelPoint.setEnabled(false);
 
+  _camera.set_power(true);
+  _camera.s_powerClicked(false);
+
   // 布局界面
-  _leftLayout.addWidget(&_bench);
+  _leftWidget.setLayout(&_stackLayout);
+  _stackLayout.addWidget(&_camera);
+  _stackLayout.addWidget(&_bench);
+  _leftLayout.addWidget(&_leftWidget);
   _leftLayout.addWidget(&_current);
 
   // 右边的垂直界面
@@ -109,62 +115,76 @@ MVS_Calibration::MVS_Calibration(GaoCe::GaoCe& algo, QWidget* parent)
   connect(
     &_reCalButton, &QPushButton::clicked, this, &_T::on_reCalButton_clicked);
   connect(&_saveImg, &QPushButton::clicked, this, &_T::on_saveImg_clicked);
+
+  connect(&_timer, &QTimer::timeout, this, &_T::when_timer_timeout);
+
+  connect(&_camera,
+          &Eyestack::Design::Monitor::s_powerClicked,
+          this,
+          &_T::when_configMonitor_powerClicked);
+  _timer.start(50);
+
+  // 初始化状态
+  _stackLayout.setCurrentIndex(0);
 }
 
+#ifdef USE_CAM
 // 相机用
-// void
-// MVS_Calibration::on_refresh_clicked()
-//{
+void
+MVS_Calibration::on_refresh_clicked()
+{
 
-//  if (temp > _imageSpin.value()) {
-//    QMessageBox MBox;
-//    MBox.setWindowTitle("提示");
-//    MBox.setText("图像数已达上线，请标定或增加图像");
-//    MBox.exec();
-//    return;
-//  }
-//  auto image = _getInput();
-//  if (image.empty()) {
-//    QMessageBox MBox;
-//    MBox.setWindowTitle("警告");
-//    MBox.setText("相机未抓取到图片");
-//    MBox.exec();
-//    return;
-//  }
-//  // 深拷贝
-//  image.copyTo(saveImg);
-//  _current.setText("当前选取图片" + QString::number(temp));
-//  auto row = _rowNumSpin.value();
-//  auto col = _colNumSpin.value();
-//  cv::Size camPatternSize = cv::Size(row, col);
-//  cv::Mat imgCamBGR;
+  if (temp > _imageSpin.value()) {
+    QMessageBox MBox;
+    MBox.setWindowTitle("提示");
+    MBox.setText("图像数已达上线，请标定或增加图像");
+    MBox.exec();
+    return;
+  }
+  auto image = _getInput();
+  if (image.empty()) {
+    QMessageBox MBox;
+    MBox.setWindowTitle("警告");
+    MBox.setText("相机未抓取到图片");
+    MBox.exec();
+    return;
+  }
+  // 深拷贝
+  image.copyTo(saveImg);
+  _current.setText("当前选取图片" + QString::number(temp));
+  auto row = _rowNumSpin.value();
+  auto col = _colNumSpin.value();
+  cv::Size camPatternSize = cv::Size(row, col);
+  cv::Mat imgCamBGR;
 
-//  _algo.find_camcorners(image, camPatternSize, &camCorners);
+  _algo.find_camcorners(image, camPatternSize, &camCorners);
 
-//  // TODO 没有提取到角点
-//  if (cv::sum(camCorners)[0] == 0) {
-//    QMessageBox MBox;
-//    MBox.setWindowTitle("警告");
-//    MBox.setText("未提取到角点，请检查棋盘格个数是否正确");
-//    MBox.exec();
-//    return;
-//  }
-//  temp++;
-//  std::vector<cv::Point2f> imagecorner = cv::Mat_<cv::Point2f>(camCorners);
+  // TODO 没有提取到角点
+  if (cv::sum(camCorners)[0] == 0) {
+    QMessageBox MBox;
+    MBox.setWindowTitle("警告");
+    MBox.setText("未提取到角点，请检查棋盘格个数是否正确");
+    MBox.exec();
+    return;
+  }
+  temp++;
+  std::vector<cv::Point2f> imagecorner = cv::Mat_<cv::Point2f>(camCorners);
 
-//  // 转换为三通道图片，角点标注才有颜色
-//  cv::cvtColor(image, imgCamBGR, cv::COLOR_GRAY2BGR);
+  // 转换为三通道图片，角点标注才有颜色
+  cv::cvtColor(image, imgCamBGR, cv::COLOR_GRAY2BGR);
 
-//  // 输出所有的角点到屏幕上
-//  for (uint8_t i = 0; i < imagecorner.size(); i++) {
-//    circle(imgCamBGR, imagecorner[i], 10, cv::Scalar(0, 0, 255), 5);
-//  }
-//  _bench.display(imgCamBGR);
-//  _refreshButton.setEnabled(false);
-//  _selPoint.setEnabled(true);
-//  _noSelPoint.setEnabled(true);
-//}
+  // 输出所有的角点到屏幕上
+  for (uint8_t i = 0; i < imagecorner.size(); i++) {
+    circle(imgCamBGR, imagecorner[i], 10, cv::Scalar(0, 0, 255), 5);
+  }
+  _bench.display(imgCamBGR);
+  _stackLayout.setCurrentIndex(1);
+  _refreshButton.setEnabled(false);
+  _selPoint.setEnabled(true);
+  _noSelPoint.setEnabled(true);
+}
 
+#else
 // 测试图像用
 void
 MVS_Calibration::on_refresh_clicked()
@@ -221,10 +241,13 @@ MVS_Calibration::on_refresh_clicked()
     circle(image, imagecorner[i], 10, cv::Scalar(0, 0, 255), 5);
   }
   _bench.display(image);
+  _stackLayout.setCurrentIndex(1);
   _refreshButton.setEnabled(false);
   _selPoint.setEnabled(true);
   _noSelPoint.setEnabled(true);
 }
+
+#endif
 
 void
 MVS_Calibration::on_selPoint_clicked()
@@ -238,6 +261,7 @@ MVS_Calibration::on_selPoint_clicked()
   MBox.setWindowTitle("提示");
   MBox.setText("提取角点成功");
   MBox.exec();
+  _stackLayout.setCurrentIndex(0);
   _refreshButton.setEnabled(true);
   _selPoint.setEnabled(false);
   _noSelPoint.setEnabled(false);
@@ -253,6 +277,7 @@ MVS_Calibration::on_noSelPoint_clicked()
   MBox.setWindowTitle("提示");
   MBox.setText("提取角点失败，请重新刷新输入");
   MBox.exec();
+  _stackLayout.setCurrentIndex(0);
   _refreshButton.setEnabled(true);
   _selPoint.setEnabled(false);
   _noSelPoint.setEnabled(false);
@@ -293,6 +318,7 @@ MVS_Calibration::on_reCalButton_clicked()
 {
   calibCamProcessParam._camCornersMat.clear();
   calibCamProcessParam._camPatternSize.clear();
+  saveImg.release();
   _refreshButton.setEnabled(true);
   _calButton.setEnabled(false);
   _reCalButton.setEnabled(false);
@@ -320,4 +346,18 @@ MVS_Calibration::on_saveImg_clicked()
   QFile file(filename);
   if (filename != "")
     cv::imwrite(filename.toStdString(), saveImg);
+}
+
+void
+MVS_Calibration::when_timer_timeout()
+{
+  cv::Mat image = _getInput();
+  _camera.display_cvmat(image);
+}
+
+void
+MVS_Calibration::when_configMonitor_powerClicked(bool power)
+{
+  cv::Mat image = _getInput();
+  _camera.display_cvmat(image);
 }

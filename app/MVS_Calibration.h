@@ -4,8 +4,10 @@
 #include "pcl/point_types.h"
 #include <Eyestack/Design/ImageBench.hpp>
 #include <Eyestack/Design/ImageLabel.hpp>
+#include <Eyestack/Design/Monitor.hpp>
 #include <Eyestack/Design/Progressor.hpp>
 #include <Eyestack/Framework.hpp>
+// #define USE_CAM
 
 namespace esb = Eyestack::Base;
 namespace esd = Eyestack::Design;
@@ -37,7 +39,9 @@ private:
   GaoCe::GaoCe& _algo;
   GaoCe::CalibCamProcessParam calibCamProcessParam;
   QWidget _leftWidget;
+  QStackedLayout _stackLayout;
   QVBoxLayout _leftLayout;
+  esd::Monitor _camera;
   esd::ImageBench _bench;
   QLabel _imageNum, _chessNum, _chessSize, _errorShow, _cornerPoint;
   QSpinBox _imageSpin, _rowNumSpin, _colNumSpin;
@@ -45,11 +49,12 @@ private:
   QPushButton _refreshButton, _calButton, _reCalButton;
   QPushButton _selPoint, _noSelPoint, _saveImg;
   QLineEdit _error;
-  QDoubleSpinBox _xSize, _ySize;
+  // QDoubleSpinBox _xSize, _ySize;
   QLabel _current;
   cv::Mat image;
   cv::Mat saveImg;
   cv::Mat camCorners;
+  QTimer _timer;
   int temp = 1;
 
 private slots:
@@ -59,4 +64,9 @@ private slots:
   void on_calButton_clicked();
   void on_reCalButton_clicked();
   void on_saveImg_clicked();
+
+  // 配置界面的电源键控制监视定时器的启动和停止
+  void when_configMonitor_powerClicked(bool power);
+  // 当 _timer 计时结束时取帧刷新到界面上
+  void when_timer_timeout();
 };

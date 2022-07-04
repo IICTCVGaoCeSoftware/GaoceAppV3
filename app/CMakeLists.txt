@@ -18,8 +18,7 @@ target_link_libraries(APP PUBLIC ${PCL_LIBRARIES} ${VTK_LIBRARIES})
 
 
 target_link_libraries(APP PUBLIC _PCH
-  Eyestack::Framework Eyestack::Gencom Eyestack::Com_MVS
-  Eyestack::Com_DLP
+  Eyestack::Framework Eyestack::Gencom Eyestack::Com_MVS Eyestack::Com_DLP
   GaoCeV3::ALGO Qt5::PrintSupport Qt5::Charts
 )
 
@@ -44,4 +43,4 @@ target_precompile_headers(${PROJECT_NAME} REUSE_FROM _PCH)
 # 部署规则
 install(TARGETS ${PROJECT_NAME})
 
-install_eyestack_runtime(${PROJECT_NAME} MODULE Gencom Com_MVS)
+install_eyestack_runtime(${PROJECT_NAME} MODULE Gencom Com_MVS Com_DLP)
