@@ -61,8 +61,7 @@ PatternCoding::PatternCoding(GaoCe::GaoCe& algo, QWidget* parent)
 void
 PatternCoding::on_calButton_clicked()
 {
-  GaoCeWrapper* myWrapper = dynamic_cast<GaoCeWrapper*>(&_algo);
-  _algo.rays_palnes(&myWrapper->_gaoce->_calibOutputParam);
+  _algo.rays_palnes();
   QMessageBox MBox;
   MBox.setWindowTitle("提示");
   MBox.setText("标定成功");

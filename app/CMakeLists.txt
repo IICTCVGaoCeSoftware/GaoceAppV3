@@ -11,14 +11,15 @@ add_library(APP OBJECT
   DLP_Calibration.hpp DLP_Calibration.cpp
   PatternCoding.hpp PatternCoding.cpp
   ReConstructWindow.hpp ReConstructWindow.cpp
-  V2.hpp V2.cpp
+  GaoCe_InitParams.hpp GaoCe_InitParams.cpp
 )
 
 target_link_libraries(APP PUBLIC ${PCL_LIBRARIES} ${VTK_LIBRARIES})
 
 
 target_link_libraries(APP PUBLIC _PCH
-  Eyestack::Framework Eyestack::Gencom Eyestack::Com_MVS Eyestack::Com_DLP
+  Eyestack::Framework Eyestack::Gencom Eyestack::Com_MVS
+  Eyestack::Com_DLP
   GaoCeV3::ALGO Qt5::PrintSupport Qt5::Charts
 )
 

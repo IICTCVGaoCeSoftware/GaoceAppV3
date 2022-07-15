@@ -6,6 +6,7 @@ VTK_MODULE_INIT(vtkInteractionStyle)
 #include "Eyestack/Com_MVS/MvsCameraWrapper.hpp"
 #include "Eyestack/Design/Monitor.hpp"
 #include "GaoCe.hpp"
+#include "GaoCe_InitParams.hpp"
 #include "pcl/point_cloud.h"
 #include <Eyestack/Framework.hpp>
 #include <QVTKOpenGLNativeWidget.h>
@@ -40,6 +41,7 @@ class ReConstructWindow : public QWidget
   using _S = QWidget;
 
 public:
+  std::function<cv::Mat()> _getInput_soft = []() { return cv::Mat(); };
   std::function<cv::Mat()> _getInput = []() { return cv::Mat(); };
 
 public:
@@ -48,38 +50,44 @@ public:
 private:
   GaoCe::GaoCe& _algo;
   esd::Monitor _camera;
-  QWidget* _widget1;
   QTimer _timer;
-  QPushButton _reconOnce, _reconContinue, _reconStop, _savePCD, _savePLY,
-    _saveDeepImg;
+
+  QHBoxLayout* pointLayout;
+  QHBoxLayout* hlayout;
+  QPushButton _reconOnce, _config, _reconStop, _savePCD, _savePLY, _saveDeepImg;
+  QPushButton _showErr;
   QVTKOpenGLNativeWidget _pointCloud;
-  QCheckBox _showCamera, _showDeepImg;
+  QCheckBox _showCamera, _showDeepImg, _showPC;
   QComboBox _selShow;
+  QLineEdit _err;
 
   pcl::PointCloud<pcl::PointXYZ> cloud;
-  pcl::PointCloud<pcl::PointXYZ>::Ptr cloud2;
+  pcl::PointCloud<pcl::PointXYZ>::Ptr _cloud2;
   cv::Mat transform_depth_image;
-  boost::shared_ptr<pcl::visualization::PCLVisualizer> _viewer111;
   esd::ImageLabel _deepImg;
 
+signals:
+  void s_show();
+
 private slots:
-  // 配置界面的电源键控制监视定时器的启动和停止
-  // void when_configMonitor_powerClicked(bool power);
   // 当 _timer 计时结束时取帧刷新到界面上
   void when_timer_timeout();
-
+  // 控制相机和深度图的开关
   void onStateChanged(int state);
   void onStateChanged1(int state);
+  void on_PC_Changed(int state);
   void on_reconOnce_clicked();
-  void on_reconContinue_clicked();
   void on_reconStop_clicked();
   void on_savePCD_clicked();
   void on_savePLY_clicked();
   void on_saveDeepImg_clicked();
   void on_showDeepImg_checked();
+  void switch_window(int index);
+  void on_reconContinue_clicked();
+  void on_showErr_clicked();
 
 public:
-  void initialVtkWidget();
+  // void initialVtkWidget();
   void disable_all();
   void enable_all();
 };

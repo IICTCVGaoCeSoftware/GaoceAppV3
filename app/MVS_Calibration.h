@@ -7,7 +7,7 @@
 #include <Eyestack/Design/Monitor.hpp>
 #include <Eyestack/Design/Progressor.hpp>
 #include <Eyestack/Framework.hpp>
-// #define USE_CAM
+#define USE_CAM
 
 namespace esb = Eyestack::Base;
 namespace esd = Eyestack::Design;
@@ -46,16 +46,18 @@ private:
   QLabel _imageNum, _chessNum, _chessSize, _errorShow, _cornerPoint;
   QSpinBox _imageSpin, _rowNumSpin, _colNumSpin;
   QSpinBox _rowSize, _colSize;
-  QPushButton _refreshButton, _calButton, _reCalButton;
+  QPushButton _refreshButton, _calButton, _reCalButton, _config;
   QPushButton _selPoint, _noSelPoint, _saveImg;
   QLineEdit _error;
-  // QDoubleSpinBox _xSize, _ySize;
   QLabel _current;
   cv::Mat image;
   cv::Mat saveImg;
   cv::Mat camCorners;
   QTimer _timer;
   int temp = 1;
+
+signals:
+  void s_show();
 
 private slots:
   void on_refresh_clicked();
@@ -69,4 +71,6 @@ private slots:
   void when_configMonitor_powerClicked(bool power);
   // 当 _timer 计时结束时取帧刷新到界面上
   void when_timer_timeout();
+  //
+  void on_config_clicked();
 };

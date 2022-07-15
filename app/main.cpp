@@ -1,4 +1,5 @@
 #include "GaoCe.hpp"
+#include "ReConstructWindow.hpp"
 #include "Worker.hpp"
 #include "version.hpp"
 #include "wrapper.hpp"
@@ -20,6 +21,38 @@ main(int argc, char* argv[])
 
   //  获取相机画面
   std::function<cv::Mat()> getInput;
+  std::function<cv::Mat()> input;
+
+  input = [worker]() -> cv::Mat {
+    es::Com_MVS::MvsCameraWrapper::Shared mc;
+
+    mc->SetEnumValue("TriggerMode", MV_TRIGGER_MODE_ON);
+    mc->SetEnumValue("TriggerSource", 7);
+    mc->CommandExecute("TriggerSoftware");
+
+    if (QThread::currentThread() == worker->thread()) {
+      mc = worker->_mc.camera();
+    } else {
+      QMetaObject::invokeMethod(
+        worker,
+        [worker, &mc]() { mc = worker->_mc.camera(); },
+        Qt::BlockingQueuedConnection);
+    }
+
+    if (!mc)
+      return cv::Mat();
+
+    try {
+      return mc->snap_cvmat(15);
+
+    } catch (const es::Com_MVS::MvsError& e) {
+      esf::Application::notifier().notify_text(
+        e.repr(), QtMsgType::QtCriticalMsg, "获取图像失败");
+    }
+
+    return cv::Mat();
+  };
+
   getInput = [worker]() -> cv::Mat {
     es::Com_MVS::MvsCameraWrapper::Shared mc;
     bool colored;
@@ -64,8 +97,9 @@ main(int argc, char* argv[])
 
   GaoCeConfigSubUi _cSubUi{ *worker };
   {
-    _cSubUi._reConWin._getInput = _cSubUi._MVScal._getInput =
-      _cSubUi._DLPcal._getInput = getInput;
+    _cSubUi._reConWin._getInput = getInput;
+    _cSubUi._reConWin._getInput_soft = input;
+    _cSubUi._MVScal._getInput = _cSubUi._DLPcal._getInput = getInput;
   }
   app.reg_sub_ui(_cSubUi);
 

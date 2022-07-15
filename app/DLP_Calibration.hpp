@@ -44,18 +44,24 @@ private:
   QLabel _imageNum, _chessNum, _initOffset, _chessDis, _errorShow, _cornerPoint;
   QLabel _resolution, _multi;
   QSpinBox _imageSpin, _rowNumSpin, _colNumSpin, _maskRow, _maskCol;
-  QSpinBox _rowSize, _colSize, _horiDis, _verDis;
+  QSpinBox _rowOffset, _colOffset;
+  QDoubleSpinBox _horiDis, _verDis;
   QLineEdit _reso1, _reso2;
-  QPushButton _refreshButton, _calButton, _reCalButton, _saveImg;
+  QPushButton _refreshButton, _calButton, _reCalButton, _saveImg, _config;
   QPushButton _selPoint, _noSelPoint, _excCorner, _insertMask;
   QLineEdit _error;
   QLabel _current, _projDistri, _calDistri, _projMaskL, _calMastL;
 
   cv::Mat proImgCorners; // 输出的投影棋盘格角点
   cv::Mat proCamCorners; // 精细化的打印角点
-  cv::Mat image;         // 主界面显示的图像
-  cv::Mat saveImg;
+  cv::Mat proCamCornersCoarse; // 投影仪粗角点（外面）
+  cv::Mat calCamCornersCoarse; // 标定板粗角点（里面）
+  cv::Mat proProjCorners; //输出，投影棋盘格角点在投影仪的像素坐标
+  cv::Mat camRepErr;
 
+  cv::Mat image; // 主界面显示的图像
+  cv::Mat saveImg;
+  QTimer _timer;
   int temp = 1;
 
   esd::ImageLabel _showImgCorner;
@@ -68,6 +74,10 @@ private:
   QRadioButton _showDistri;
   QTableWidget _projMask;
   QTableWidget _calMask;
+  QFile* file;
+
+signals:
+  void s_show();
 
 private slots:
   void handleRadioGroup(int id);
@@ -79,8 +89,20 @@ private slots:
   void on_excCorner_clicked();
   void on_insertMask_clicked();
   void on_saveImg_clicked();
+  void on_config_clicked();
+  void cal_initOffset();
+  // 配置界面的电源键控制监视定时器的启动和停止
+  void when_configMonitor_powerClicked(bool power);
+  // 当 _timer 计时结束时取帧刷新到界面上
+  void when_timer_timeout();
 
 private:
+  /**
+   * @brief 读取四边形的顶点，方向是↖↙↘↗
+   * @param proCamCornersCoarse
+   */
+  void read_CamCorners(cv::Mat& proCamCornersCoarse,
+                       cv::Mat& calCamCornersCoarse);
   void hide_all();
   void show_all();
 };

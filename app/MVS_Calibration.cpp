@@ -11,10 +11,11 @@ MVS_Calibration::MVS_Calibration(GaoCe::GaoCe& algo, QWidget* parent)
   , _refreshButton("刷新输入")
   , _calButton("标定相机")
   , _reCalButton("重新标定")
+  , _config("更多设置")
 {
   // 组件初始化
   _imageSpin.setPrefix("采集图像 ");
-  _imageSpin.setValue(15);
+  _imageSpin.setValue(20);
   _imageSpin.setSuffix(" 张");
   _rowNumSpin.setPrefix("行方向 ");
   _rowNumSpin.setValue(10);
@@ -88,8 +89,10 @@ MVS_Calibration::MVS_Calibration(GaoCe::GaoCe& algo, QWidget* parent)
   hlayout->addLayout(&_leftLayout);
   hlayout->addLayout(vlayout);
 
+  // 标定及其结果
   auto calLayout = new QHBoxLayout();
   calLayout->addWidget(&_calButton);
+  calLayout->addWidget(&_config);
   calLayout->addSpacing(30);
   calLayout->addWidget(&_errorShow);
   calLayout->addWidget(&_error);
@@ -109,6 +112,8 @@ MVS_Calibration::MVS_Calibration(GaoCe::GaoCe& algo, QWidget* parent)
   connect(&_selPoint, &QPushButton::clicked, this, &_T::on_selPoint_clicked);
 
   connect(&_calButton, &QPushButton::clicked, this, &_T::on_calButton_clicked);
+
+  connect(&_config, &QPushButton::clicked, this, &_T::on_config_clicked);
 
   connect(
     &_noSelPoint, &QPushButton::clicked, this, &_T::on_noSelPoint_clicked);
@@ -197,7 +202,7 @@ MVS_Calibration::on_refresh_clicked()
     return;
   }
 
-  QString str = "D:/IICT/DLPPattern/images/camera/C";
+  QString str = "D:/IICT/DLPPattern/images/camera(0711)/";
   QString s = QString::number(temp);
   str = str + s;
   str += ".bmp";
@@ -208,6 +213,7 @@ MVS_Calibration::on_refresh_clicked()
   // 未抓取图像的判断
   if (image.empty()) {
     QMessageBox MBox;
+    MBox.setIcon(QMessageBox::Information);
     MBox.setWindowTitle("警告");
     MBox.setText("相机未抓取到图片");
     MBox.exec();
@@ -228,6 +234,7 @@ MVS_Calibration::on_refresh_clicked()
   // 没有提取到角点
   if (cv::sum(camCorners)[0] == 0) {
     QMessageBox MBox;
+    MBox.setIcon(QMessageBox::Warning);
     MBox.setWindowTitle("警告");
     MBox.setText("未提取到角点，请检查棋盘格个数是否正确");
     MBox.exec();
@@ -291,20 +298,10 @@ MVS_Calibration::on_calButton_clicked()
   calibCamProcessParam._camRealDx = 5;
   calibCamProcessParam._camRealDy = 5;
 
-  _algo.camera_calib(calibCamProcessParam);
+  cv::Mat err;
+  _algo.camera_calib(calibCamProcessParam, &err);
 
-  GaoCeWrapper* myWrapper = dynamic_cast<GaoCeWrapper*>(&_algo);
-  if (myWrapper) {
-    qDebug() << "myWrapper is not null";
-
-    qDebug() << "the add2 = " << &myWrapper->_gaoce->_calibCamResult;
-  } else
-    qDebug() << "myWrapper is  null";
-
-  qDebug() << "outside add is:" << &_algo._calibCamResult;
-
-  double Err1 =
-    myWrapper->_gaoce->_calibCamResult._camReprojErr.at<double>(0, 0);
+  double Err1 = err.at<double>(0, 0);
 
   _error.setText(QString::number(Err1, 'f', 2));
   QMessageBox MBox;
@@ -360,4 +357,10 @@ MVS_Calibration::when_configMonitor_powerClicked(bool power)
 {
   cv::Mat image = _getInput();
   _camera.display_cvmat(image);
+}
+
+void
+MVS_Calibration::on_config_clicked()
+{
+  emit s_show();
 }
