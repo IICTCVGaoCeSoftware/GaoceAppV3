@@ -55,7 +55,7 @@ private:
   QHBoxLayout* pointLayout;
   QHBoxLayout* hlayout;
   QPushButton _reconOnce, _config, _reconStop, _savePCD, _savePLY, _saveDeepImg;
-  QPushButton _showErr;
+  QPushButton _showErr, _tranDeepImg;
   QVTKOpenGLNativeWidget _pointCloud;
   QCheckBox _showCamera, _showDeepImg, _showPC;
   QComboBox _selShow;

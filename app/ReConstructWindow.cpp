@@ -5,12 +5,12 @@
 namespace esb = Eyestack::Base;
 namespace esd = Eyestack::Design;
 namespace esf = Eyestack::Framework;
-extern esb::Profiler gProfiler;
 
 ReConstructWindow::ReConstructWindow(GaoCe::GaoCe& algo, QWidget* parent)
   : _S(parent)
   , _algo(algo)
   , _showErr("显示误差")
+  , _tranDeepImg("深度图转点云")
 {
   _config.setText("更多设置");
   _reconOnce.setText("重建一次");
@@ -28,13 +28,17 @@ ReConstructWindow::ReConstructWindow(GaoCe::GaoCe& algo, QWidget* parent)
   _selShow.addItem("请选择重构对象");
   _selShow.addItem("构建点云");
   _selShow.addItem("构建深度图");
-
+  _showCamera.setEnabled(false);
+  _showDeepImg.setEnabled(false);
+  _showPC.setEnabled(false);
+  _tranDeepImg.setEnabled(false);
   // 右边菜单栏的垂直界面
   auto vlayout = new QVBoxLayout();
   vlayout->addWidget(&_selShow);
   vlayout->addWidget(&_config);
   vlayout->addWidget(&_reconOnce);
   vlayout->addWidget(&_reconStop);
+  vlayout->addWidget(&_tranDeepImg);
   vlayout->addWidget(&_showCamera);
   vlayout->addWidget(&_showDeepImg);
   vlayout->addWidget(&_showPC);
@@ -77,6 +81,9 @@ ReConstructWindow::ReConstructWindow(GaoCe::GaoCe& algo, QWidget* parent)
     &_saveDeepImg, &QPushButton::clicked, this, &_T::on_saveDeepImg_clicked);
 
   connect(&_showErr, &QPushButton::clicked, this, &_T::on_showErr_clicked);
+  //  connect(
+  //    &_tranDeepImg, &QPushButton::clicked, this,
+  //    &_T::on_tranDeepImg_clicked);
 
   connect(
     &_showCamera, SIGNAL(stateChanged(int)), this, SLOT(onStateChanged(int)));
@@ -135,27 +142,29 @@ void
 ReConstructWindow::on_reconOnce_clicked()
 {
   //重建
-  //  std::string path = "C:/Gaoce/image";
-  // std::string path = "D:/IICT/DLPPattern/images/ban0711";
-  //  std::vector<std::string> fn;
-  //  cv::glob(path, fn, false);
+  // std::string path = "C:/Gaoce/image";
+  //   std::string path = "D:/IICT/DLPPattern/images/ban0711";
+  // std::vector<std::string> fn;
+  // cv::glob(path, fn, false);
   std::vector<cv::Mat> imgList;
-  for (uint8_t i = 0; i < 24; i++) {
-    cv::Mat temp = _getInput_soft();
-    imgList.emplace_back(temp);
-    QString str = "C/Gaoce/Timage/" + QString::number(i);
-    cv::imwrite(str.toStdString(), temp);
-    temp.release();
+  for (int i = 0; i < 500; i++) {
+    cv::Mat temp = _getInput_soft().clone();
+    try {
+      if (!temp.empty()) {
+        QString str = "D:/GaoCe/Timage/" + QString::number(i) + ".bmp";
+        imgList.push_back(temp);
+        cv::imwrite(str.toStdString(), temp);
+        if (imgList.size() == 24) {
+          break;
+        }
+      }
+    } catch (...) {
+      esf::Application::notifier().notify_error(std::current_exception(),
+                                                "高测算法");
+    }
   }
-  //  for (auto img_path : fn) {
-  //    cv::Mat img = cv::imread(img_path, cv::IMREAD_GRAYSCALE);
-  //    imgList.push_back(img);
-  //  }
 
-  {
-    esb::Profiler::Scoper timer(gProfiler, "realTime::reconstruction");
-    _algo.recon_pcl_with_gray_liting(imgList, &cloud);
-  }
+  _algo.recon_pcl_with_gray_liting(imgList, &cloud);
 
   pcl::visualization::CloudViewer viewer("Cloud Viewer");
   _cloud2 = cloud.makeShared();
@@ -188,9 +197,11 @@ ReConstructWindow::on_reconOnce_clicked()
   renderer->SetBackground(.1, .1, .1);
   _pointCloud.GetRenderWindow()->AddRenderer(renderer);
 
-  //  viewer.showCloud(cloud2);
-  //  while (!viewer.wasStopped()) {
-  //  }
+  // imgList.clear();
+  //   renderer->Clear();
+  //   viewer.showCloud(cloud2);
+  //   while (!viewer.wasStopped()) {
+  //   }
 }
 
 void
@@ -381,3 +392,9 @@ ReConstructWindow::on_PC_Changed(int state)
     }
   }
 }
+
+// void
+// ReConstructWindow::on_tranDeepImg_clicked()
+//{
+//   _algo.transform_pointcloud(transform_depth_image, cloud);
+// }

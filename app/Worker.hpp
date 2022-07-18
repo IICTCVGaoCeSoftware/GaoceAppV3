@@ -21,6 +21,7 @@ class Worker : public esf::Worker
 
 public:
   std::function<cv::Mat()> _getInput;
+  std::function<cv::Mat()> _input;
 
   std::unique_ptr<GaoCe::GaoCe> _algo;
   esg::VideoCapture _vc{ *this };
