@@ -9,6 +9,7 @@ DLP_Calibration::DLP_Calibration(GaoCe::GaoCe& algo, QWidget* parent)
   , _reCalButton("重新标定")
   , _saveImg("保存图片")
   , _config("更多设置")
+  , _projChess("投影棋盘格")
 {
   // 配置组件
   _imageSpin.setPrefix("采集图像 ");
@@ -74,12 +75,12 @@ DLP_Calibration::DLP_Calibration(GaoCe::GaoCe& algo, QWidget* parent)
   _timer.start(50);
 
   // 逻辑禁用关系
+  _refreshButton.setEnabled(false);
   _calButton.setEnabled(false);
   _reCalButton.setEnabled(false);
   _selPoint.setEnabled(false);
   _noSelPoint.setEnabled(false);
   _excCorner.setEnabled(false);
-
   _camera.set_power(true);
   _camera.s_powerClicked(false);
 
@@ -164,6 +165,7 @@ DLP_Calibration::DLP_Calibration(GaoCe::GaoCe& algo, QWidget* parent)
   chesslayout->addWidget(&_chessNum);
   chesslayout->addWidget(&_rowNumSpin);
   chesslayout->addWidget(&_colNumSpin);
+  chesslayout->addWidget(&_projChess);
   vlayout->addLayout(chesslayout);
 
   // 初始偏移
@@ -228,6 +230,7 @@ DLP_Calibration::DLP_Calibration(GaoCe::GaoCe& algo, QWidget* parent)
   connect(&_calButton, &QPushButton::clicked, this, &_T::on_calButton_clicked);
   connect(&_selPoint, &QPushButton::clicked, this, &_T::on_selPoint_clicked);
   connect(&_excCorner, &QPushButton::clicked, this, &_T::on_excCorner_clicked);
+  connect(&_projChess, &QPushButton::clicked, this, &_T::on_projChess_clicked);
 
   connect(
     &_noSelPoint, &QPushButton::clicked, this, &_T::on_noSelPoint_clicked);
@@ -275,7 +278,7 @@ DLP_Calibration::on_refresh_clicked()
     return;
   }
   temp++;
-  _current.setText("当前选取图片" + QString::number(temp++));
+  _current.setText("当前选取图片" + QString::number(temp));
   _inputBench.display(image);
   _stackLayout.setCurrentIndex(1);
   _refreshButton.setEnabled(false);
@@ -297,7 +300,7 @@ DLP_Calibration::on_refresh_clicked()
 
   _current.setText("当前选取图片" + QString::number(temp));
 
-  QString str = "D:/IICT/DLPPattern/images/projector(0711)/";
+  QString str = "D:/IICT/DLPPattern/images/0720/p/";
   QString s = QString::number(temp);
   str = str + s;
   str += ".bmp";
@@ -340,14 +343,19 @@ DLP_Calibration::on_excCorner_clicked()
   auto height = _reso2.text().toInt(); // 720
   cv::Size proResolution = cv::Size(wide, height);
 
-  //  cv::Mat imgProGray;
-  //  cv::cvtColor(image, imgProGray, cv::COLOR_BGR2GRAY);
+#ifdef USE_CAM
+
+#else
+  cv::Mat imgProGray;
+  cv::cvtColor(image, imgProGray, cv::COLOR_BGR2GRAY);
+#endif
 
   proCamCornersCoarse = cv::Mat(4, 1, CV_32FC2);
   calCamCornersCoarse = cv::Mat(4, 1, CV_32FC2);
 
   read_CamCorners(proCamCornersCoarse, calCamCornersCoarse);
 
+#ifdef USE_CAM
   _algo.find_procorners(image,
                         calCamCornersCoarse,
                         proCamCornersCoarse,
@@ -359,7 +367,19 @@ DLP_Calibration::on_excCorner_clicked()
                         &proImgCorners,
                         &proCamCorners,
                         &proProjCorners);
-
+#else
+  _algo.find_procorners(imgProGray,
+                        calCamCornersCoarse,
+                        proCamCornersCoarse,
+                        proResolution,
+                        calibPatternSize,
+                        proPatternSize,
+                        proOffsetDx,
+                        proOffsetDy,
+                        &proImgCorners,
+                        &proCamCorners,
+                        &proProjCorners);
+#endif
   // 没有提取到角点
   if (cv::sum(proImgCorners)[0] == 0 || cv::sum(proCamCorners)[0] == 0) {
     QMessageBox MBox;
@@ -371,7 +391,11 @@ DLP_Calibration::on_excCorner_clicked()
 
   // 转换为三通道图片，角点标注才有颜色
   cv::Mat imgCamBGR;
+#ifdef USE_CAM
   cv::cvtColor(image, imgCamBGR, cv::COLOR_GRAY2BGR);
+#else
+  cv::cvtColor(imgProGray, imgCamBGR, cv::COLOR_GRAY2BGR);
+#endif
 
   std::vector<cv::Point2f> imagecorner = cv::Mat_<cv::Point2f>(proImgCorners);
   std::vector<cv::Point2f> camcorner = cv::Mat_<cv::Point2f>(proCamCorners);
@@ -400,7 +424,7 @@ DLP_Calibration::on_selPoint_clicked()
   auto col = _colNumSpin.value();
   cv::Size proPatternSize = cv::Size(row, col);
 
-  // 水平和垂直偏移
+  // 水平和垂直间距
   auto hor = _horiDis.value();
   auto ver = _verDis.value();
 
@@ -487,7 +511,7 @@ DLP_Calibration::on_selPoint_clicked()
 
   _stackLayout.setCurrentIndex(0);
   // 逻辑禁用
-  _refreshButton.setEnabled(true);
+  _refreshButton.setEnabled(false);
   _selPoint.setEnabled(false);
   _noSelPoint.setEnabled(false);
   _excCorner.setEnabled(false);
@@ -503,7 +527,7 @@ DLP_Calibration::on_noSelPoint_clicked()
   MBox.setText("提取角点失败，请重新刷新输入");
   MBox.exec();
   _stackLayout.setCurrentIndex(0);
-  _refreshButton.setEnabled(true);
+  _refreshButton.setEnabled(false);
   _selPoint.setEnabled(false);
   _noSelPoint.setEnabled(false);
 }
@@ -513,18 +537,19 @@ DLP_Calibration::on_calButton_clicked()
 {
   calibProjProcessPara._proResolution = cv::Size(1280, 720);
 
-  _algo.projector_calib(calibProjProcessPara, &camRepErr);
+  cv::Mat camRepErr;
+  esd::Progressor::exec(
+    [this, &camRepErr](esd::Progressor& pg) {
+      _algo.projector_calib(calibProjProcessPara, &camRepErr);
+    },
+    tr("投影仪标定中..."));
+
+  QMessageBox::information(this, tr("成功"), tr("投影仪标定完毕"));
 
   double Err = camRepErr.at<double>(0, 0);
-  _error.setText(QString::number(Err, 'f', 2));
-  QMessageBox MBox;
-  MBox.setWindowTitle("提示");
-  MBox.setText("标定投影仪成功");
-  MBox.exec();
+  _error.setText(QString::number(Err, 'f', 3));
 
-  // 写入中间文件
-  QTextStream stream(file);
-  stream << _rowOffset.value();
+  _reCalButton.setEnabled(true);
 }
 
 void
@@ -561,6 +586,7 @@ DLP_Calibration::on_insertMask_clicked()
   }
   handleRadioGroup(1);
   _showMask.setChecked(true);
+  _refreshButton.setEnabled(true);
 }
 
 void
@@ -616,8 +642,8 @@ DLP_Calibration::on_saveImg_clicked()
     MBox.exec();
     return;
   }
-  QString filename =
-    QFileDialog::getSaveFileName(this, "保存相机图像", "*.bmp");
+  QString str = QString::number(temp) + ".bmp";
+  QString filename = QFileDialog::getSaveFileName(this, "保存相机图像", str);
   QFile file(filename);
   if (filename != "")
     cv::imwrite(filename.toStdString(), saveImg);
@@ -626,7 +652,9 @@ DLP_Calibration::on_saveImg_clicked()
 void
 DLP_Calibration::on_config_clicked()
 {
-  emit s_show();
+  esd::Progressor::exec([this](esd::Progressor& pg) { emit s_showParam(); },
+                        tr("投影棋盘格中..."));
+  QMessageBox::information(this, tr("成功"), tr("棋盘格投影成功"));
 }
 
 void
@@ -695,4 +723,10 @@ DLP_Calibration::when_configMonitor_powerClicked(bool power)
 {
   cv::Mat image = _getInput();
   _camera.display_cvmat(image);
+}
+
+void
+DLP_Calibration::on_projChess_clicked()
+{
+  emit s_showChess(_rowNumSpin.value(), _colNumSpin.value());
 }

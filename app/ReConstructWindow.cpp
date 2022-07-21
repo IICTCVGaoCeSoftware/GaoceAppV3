@@ -1,10 +1,12 @@
 #include "ReConstructWindow.hpp"
 #include "pcl/io/pcd_io.h"
+#include <QtTest/QTest>
 #include <vtkVertexGlyphFilter.h>
 
 namespace esb = Eyestack::Base;
 namespace esd = Eyestack::Design;
 namespace esf = Eyestack::Framework;
+//#define USE_CAM
 
 ReConstructWindow::ReConstructWindow(GaoCe::GaoCe& algo, QWidget* parent)
   : _S(parent)
@@ -138,22 +140,24 @@ ReConstructWindow::onStateChanged1(int state)
   }
 }
 
+#ifdef USE_CAM
 void
 ReConstructWindow::on_reconOnce_clicked()
 {
-  //重建
-  // std::string path = "C:/Gaoce/image";
-  //   std::string path = "D:/IICT/DLPPattern/images/ban0711";
-  // std::vector<std::string> fn;
-  // cv::glob(path, fn, false);
+  emit s_Runonce();
+
+  //  esd::Progressor::exec([this](esd::Progressor& pg) {},
+  //                        tr("投影光栅图像中..."));
+
+  // QMessageBox::information(this, tr("成功"), tr("参数学习完毕"));
   std::vector<cv::Mat> imgList;
   for (int i = 0; i < 500; i++) {
     cv::Mat temp = _getInput_soft().clone();
+    // QString str = "D:/Gaoce/Timage/" + QString::number(i) + ".bmp";
     try {
       if (!temp.empty()) {
-        QString str = "D:/GaoCe/Timage/" + QString::number(i) + ".bmp";
-        imgList.push_back(temp);
-        cv::imwrite(str.toStdString(), temp);
+        // cv::imwrite(str.toStdString(), temp);
+        imgList.push_back(std::move(temp));
         if (imgList.size() == 24) {
           break;
         }
@@ -196,13 +200,74 @@ ReConstructWindow::on_reconOnce_clicked()
   renderer->AddActor(actor);
   renderer->SetBackground(.1, .1, .1);
   _pointCloud.GetRenderWindow()->AddRenderer(renderer);
-
-  // imgList.clear();
-  //   renderer->Clear();
-  //   viewer.showCloud(cloud2);
-  //   while (!viewer.wasStopped()) {
-  //   }
 }
+#else
+
+void
+ReConstructWindow::on_reconOnce_clicked()
+{
+  //重建
+  // std::string path = "C:/Gaoce/image";
+  std::string path = "D:/IICT/DLPPattern/images/0720/ban";
+  std::vector<std::string> fn;
+  cv::glob(path, fn, false);
+  std::vector<cv::Mat> imgList;
+  for (auto img_path : fn) {
+    cv::Mat img = std::move(cv::imread(img_path, cv::IMREAD_GRAYSCALE));
+    imgList.push_back(img);
+  }
+
+  _algo.recon_pcl_with_gray_liting(imgList, &cloud);
+
+  float err = 0;
+  _algo.compute_3dprecision_pointcloud(cloud, &err);
+  QString str = QString("ERROR is %1").arg(err);
+  _err.setText(str);
+
+  pcl::visualization::CloudViewer viewer("Cloud Viewer");
+  _cloud2 = cloud.makeShared();
+
+  _algo.transform_depth_image(cloud, &transform_depth_image);
+
+  qDebug() << "scaleDepth is " << _algo.dump_config()._scaleDepth;
+
+  _deepImg.display_cvmat(transform_depth_image);
+
+  vtkSmartPointer<vtkPoints> points = vtkSmartPointer<vtkPoints>::New();
+
+  for (int i = 0; i < _cloud2->size(); i++) {
+    points->InsertNextPoint(
+      _cloud2->at(i).x, _cloud2->at(i).y, _cloud2->at(i).z);
+  }
+
+  vtkSmartPointer<vtkPolyData> polyData = vtkSmartPointer<vtkPolyData>::New();
+  polyData->SetPoints(points);
+
+  vtkSmartPointer<vtkVertexGlyphFilter> glyphFilter =
+    vtkSmartPointer<vtkVertexGlyphFilter>::New();
+
+  glyphFilter->SetInputData(polyData);
+
+  vtkSmartPointer<vtkPolyDataMapper> mapper =
+    vtkSmartPointer<vtkPolyDataMapper>::New();
+
+  mapper->SetInputConnection(glyphFilter->GetOutputPort());
+
+  vtkSmartPointer<vtkActor> actor = vtkSmartPointer<vtkActor>::New();
+
+  actor->SetMapper(mapper);
+
+  vtkSmartPointer<vtkRenderer> renderer = vtkSmartPointer<vtkRenderer>::New();
+
+  renderer->AddActor(actor);
+  renderer->SetBackground(.1, .1, .1);
+
+  _pointCloud.GetRenderWindow()->AddRenderer(renderer);
+
+  vtkAbstractMapper3D::SetGlobalWarningDisplay(0);
+}
+
+#endif
 
 void
 ReConstructWindow::on_reconContinue_clicked()
@@ -260,12 +325,8 @@ ReConstructWindow::on_saveDeepImg_clicked()
   std::vector<int> compression_params;
   compression_params.push_back(cv::IMWRITE_PNG_COMPRESSION);
   compression_params.push_back(0);
-  compression_params.push_back(cv::IMWRITE_PNG_STRATEGY);
-  compression_params.push_back(cv::IMWRITE_PNG_STRATEGY_DEFAULT);
-  if (file.exists()) {
-    cv::imwrite(
-      filename.toStdString(), transform_depth_image, compression_params);
-  }
+  cv::imwrite(
+    filename.toStdString(), transform_depth_image, compression_params);
 }
 
 void
@@ -278,17 +339,17 @@ ReConstructWindow::on_showDeepImg_checked()
 void
 ReConstructWindow::on_showErr_clicked()
 {
-  if (cloud.empty()) {
-    QMessageBox MBox;
-    MBox.setWindowTitle("提示");
-    MBox.setText("点云为空，无法计算");
-    MBox.exec();
-    return;
-  }
-  float err = 0;
-  _algo.compute_3dprecision_pointcloud(cloud, &err);
-  QString str = QString("ERROR is %1").arg(err);
-  _err.setText(str);
+  //  if (cloud.empty()) {
+  //    QMessageBox MBox;
+  //    MBox.setWindowTitle("提示");
+  //    MBox.setText("点云为空，无法计算");
+  //    MBox.exec();
+  //    return;
+  //  }
+  //  float err = 0;
+  //  _algo.compute_3dprecision_pointcloud(cloud, &err);
+  //  QString str = QString("ERROR is %1").arg(err);
+  //  _err.setText(str);
 }
 
 void

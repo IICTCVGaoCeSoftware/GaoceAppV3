@@ -62,15 +62,14 @@ main(int argc, char* argv[])
         Qt::BlockingQueuedConnection);
     }
 
-    if (!mc)
+    if (!mc) {
       return cv::Mat();
+    }
 
     try {
       return mc->snap_cvmat(timeout, colored);
-
+      // 遗留问题
     } catch (const es::Com_MVS::MvsError& e) {
-      esf::Application::notifier().notify_text(
-        e.repr(), QtMsgType::QtCriticalMsg, "获取图像失败");
     }
 
     return cv::Mat();
@@ -92,6 +91,25 @@ main(int argc, char* argv[])
       _cSubUi._reConWin._getInput = getInput;
   }
   app.reg_sub_ui(_cSubUi);
+
+  //  ReConstructWindow _rSubUi{ *worker };
+  //  app.reg_sub_ui(_rSubUi);
+
+  // 投影仪标定-->投影棋盘格
+  QObject::connect(
+    &_cSubUi._DLPcal, &DLP_Calibration::s_showChess, [worker](int a, int b) {
+      es::Com_DLP::DlpcWrapper::Shared dlp;
+      dlp->initDlpc();
+      dlp->WriteTestPatternChessBoard(a, b);
+    });
+
+  // 传递信号 Runonce
+  QObject::connect(
+    &_cSubUi._reConWin, &ReConstructWindow::s_Runonce, [worker]() {
+      es::Com_DLP::DlpcWrapper::Shared dlp;
+      dlp->initDlpc();
+      dlp->RunOnce();
+    });
 
   return app.exec();
 }

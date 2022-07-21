@@ -5,8 +5,8 @@ VTK_MODULE_INIT(vtkRenderingOpenGL2)
 VTK_MODULE_INIT(vtkInteractionStyle)
 #include "Eyestack/Com_MVS/MvsCameraWrapper.hpp"
 #include "Eyestack/Design/Monitor.hpp"
+#include "Eyestack/Design/Progressor.hpp"
 #include "GaoCe.hpp"
-#include "GaoCe_InitParams.hpp"
 #include "pcl/point_cloud.h"
 #include <Eyestack/Framework.hpp>
 #include <QVTKOpenGLNativeWidget.h>
@@ -45,7 +45,7 @@ public:
   std::function<cv::Mat()> _getInput = []() { return cv::Mat(); };
 
 public:
-  ReConstructWindow(GaoCe::GaoCe& algo, QWidget* parent = nullptr);
+  ReConstructWindow(QWidget* parent = nullptr);
 
 private:
   GaoCe::GaoCe& _algo;
@@ -68,6 +68,7 @@ private:
 
 signals:
   void s_show();
+  void s_Runonce();
 
 private slots:
   // 当 _timer 计时结束时取帧刷新到界面上

@@ -34,4 +34,4 @@ add_subdirectory(app)
 add_subdirectory(doc)
 
 # 测试
-# add_subdirectory(test EXCLUDE_FROM_ALL)
+add_subdirectory(test EXCLUDE_FROM_ALL)

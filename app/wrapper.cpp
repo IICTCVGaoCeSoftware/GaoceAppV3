@@ -18,9 +18,9 @@ GaoCeConfigSubUi::GaoCeConfigSubUi(Worker& worker)
   , _swIp3(add_mdi_action("重建配置", _ip3))
 
 {
-  connect(&_reConWin, &ReConstructWindow::s_show, this, &_T::when_show1);
-  connect(&_MVScal, &MVS_Calibration::s_show, this, &_T::when_show2);
-  connect(&_DLPcal, &DLP_Calibration::s_show, this, &_T::when_show3);
+  connect(&_reConWin, &ReConstructWindow::s_show, this, &_T::when_show3);
+  connect(&_MVScal, &MVS_Calibration::s_show, this, &_T::when_show1);
+  connect(&_DLPcal, &DLP_Calibration::s_showParam, this, &_T::when_show2);
 }
 
 void

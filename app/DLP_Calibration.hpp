@@ -48,7 +48,7 @@ private:
   QDoubleSpinBox _horiDis, _verDis;
   QLineEdit _reso1, _reso2;
   QPushButton _refreshButton, _calButton, _reCalButton, _saveImg, _config;
-  QPushButton _selPoint, _noSelPoint, _excCorner, _insertMask;
+  QPushButton _selPoint, _noSelPoint, _excCorner, _insertMask, _projChess;
   QLineEdit _error;
   QLabel _current, _projDistri, _calDistri, _projMaskL, _calMastL;
 
@@ -57,7 +57,6 @@ private:
   cv::Mat proCamCornersCoarse; // 投影仪粗角点（外面）
   cv::Mat calCamCornersCoarse; // 标定板粗角点（里面）
   cv::Mat proProjCorners; //输出，投影棋盘格角点在投影仪的像素坐标
-  cv::Mat camRepErr;
 
   cv::Mat image; // 主界面显示的图像
   cv::Mat saveImg;
@@ -77,7 +76,8 @@ private:
   QFile* file;
 
 signals:
-  void s_show();
+  void s_showParam();
+  void s_showChess(int, int);
 
 private slots:
   void handleRadioGroup(int id);
@@ -95,6 +95,7 @@ private slots:
   void when_configMonitor_powerClicked(bool power);
   // 当 _timer 计时结束时取帧刷新到界面上
   void when_timer_timeout();
+  void on_projChess_clicked();
 
 private:
   /**

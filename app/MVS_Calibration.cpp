@@ -37,6 +37,9 @@ MVS_Calibration::MVS_Calibration(GaoCe::GaoCe& algo, QWidget* parent)
   _saveImg.setText("保存图片");
   _current.setText("当前选取图片" + QString::number(temp));
 
+  connect(&_timer, &QTimer::timeout, this, &_T::when_timer_timeout);
+  _timer.start(50);
+
   // 组件逻辑禁用
   _calButton.setEnabled(false);
   _reCalButton.setEnabled(false);
@@ -121,13 +124,10 @@ MVS_Calibration::MVS_Calibration(GaoCe::GaoCe& algo, QWidget* parent)
     &_reCalButton, &QPushButton::clicked, this, &_T::on_reCalButton_clicked);
   connect(&_saveImg, &QPushButton::clicked, this, &_T::on_saveImg_clicked);
 
-  connect(&_timer, &QTimer::timeout, this, &_T::when_timer_timeout);
-
   connect(&_camera,
           &Eyestack::Design::Monitor::s_powerClicked,
           this,
           &_T::when_configMonitor_powerClicked);
-  _timer.start(50);
 
   // 初始化状态
   _stackLayout.setCurrentIndex(0);
@@ -202,7 +202,7 @@ MVS_Calibration::on_refresh_clicked()
     return;
   }
 
-  QString str = "D:/IICT/DLPPattern/images/camera(0711)/";
+  QString str = "D:/IICT/DLPPattern/images/0720/c/";
   QString s = QString::number(temp);
   str = str + s;
   str += ".bmp";
@@ -299,15 +299,19 @@ MVS_Calibration::on_calButton_clicked()
   calibCamProcessParam._camRealDy = 5;
 
   cv::Mat err;
-  _algo.camera_calib(calibCamProcessParam, &err);
+  esd::Progressor::exec(
+    [this, &err](esd::Progressor& pg) {
+      _algo.camera_calib(calibCamProcessParam, &err);
+    },
+    tr("相机标定中..."));
+
+  QMessageBox::information(this, tr("成功"), tr("相机标定完毕"));
 
   double Err1 = err.at<double>(0, 0);
 
   _error.setText(QString::number(Err1, 'f', 2));
-  QMessageBox MBox;
-  MBox.setWindowTitle("提示");
-  MBox.setText("标定相机成功");
-  MBox.exec();
+
+  _reCalButton.setEnabled(true);
 }
 
 void
@@ -338,8 +342,8 @@ MVS_Calibration::on_saveImg_clicked()
     MBox.exec();
     return;
   }
-  QString filename =
-    QFileDialog::getSaveFileName(this, "保存相机图像", "*.bmp");
+  QString str = QString::number(temp) + ".bmp";
+  QString filename = QFileDialog::getSaveFileName(this, "保存相机图像", str);
   QFile file(filename);
   if (filename != "")
     cv::imwrite(filename.toStdString(), saveImg);

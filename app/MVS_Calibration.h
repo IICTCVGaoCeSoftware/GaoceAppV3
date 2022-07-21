@@ -7,7 +7,7 @@
 #include <Eyestack/Design/Monitor.hpp>
 #include <Eyestack/Design/Progressor.hpp>
 #include <Eyestack/Framework.hpp>
-#define USE_CAM
+//#define USE_CAM
 
 namespace esb = Eyestack::Base;
 namespace esd = Eyestack::Design;
