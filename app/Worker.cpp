@@ -17,33 +17,38 @@ Worker::c_start(qint64 cycle)
 void
 Worker::work()
 {
-  auto mat = _getInput();
+  es::Com_DLP::DlpcWrapper::Shared dlp;
+  dlp->initDlpc();
+  dlp->RunOnce();
 
-  if (mat.empty()) {
-    esf::Application::notifier().notify_text("无法从数据源读出图像",
-                                             QtMsgType::QtCriticalMsg);
-    c_stop();
-    return;
+  std::vector<cv::Mat> imgList;
+  for (int i = 0; i < 500; i++) {
+    cv::Mat temp = _input().clone();
+    // QString str = "D:/Gaoce/Timage/" + QString::number(i) + ".bmp";
+    try {
+      if (!temp.empty()) {
+        // cv::imwrite(str.toStdString(), temp);
+        imgList.push_back(std::move(temp));
+        if (imgList.size() == 24) {
+          break;
+        }
+      }
+    } catch (...) {
+      esf::Application::notifier().notify_error(std::current_exception(),
+                                                "高测算法");
+    }
   }
 
-  if (mat.type() != CV_8UC1) {
-    esf::Application::notifier().notify_text(
-      tr("数据源色彩模式错误: %1")
-        .arg(QString::fromStdString(cv::typeToString(mat.type()))),
-      QtMsgType::QtCriticalMsg);
+  pcl::PointCloud<pcl::PointXYZ> _cloud;
+  cv::Mat deepImg;
+  _algo->recon_pcl_with_gray_liting(imgList, &_cloud);
+  _algo->transform_depth_image(_cloud, &deepImg);
+
+  bool noStop = _noStop.load(std::memory_order_relaxed);
+  if (!noStop)
     c_stop();
-    return;
-  }
 
-  // mat = _algo->warp_perspective(mat);
-  // auto results = _algo->detect(mat);
-
-  //  bool noStop = _noStop.load(std::memory_order_relaxed);
-  //  if (results.size() != 0 && !noStop)
-  //    c_stop();
-
-  //  emit s_displayGaoCeResults(
-  //    mat,
-  //    QSharedPointer<std::vector<GaoCe::GaoCe::Result>>::create(
-  //      std::move(results)));
+  emit s_displayGaoCeResults(
+    deepImg,
+    QSharedPointer<pcl::PointCloud<pcl::PointXYZ>>::create(std::move(_cloud)));
 }

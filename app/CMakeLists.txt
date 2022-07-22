@@ -12,6 +12,7 @@ add_library(APP OBJECT
   PatternCoding.hpp PatternCoding.cpp
   ReConstructWindow.hpp ReConstructWindow.cpp
   GaoCe_InitParams.hpp GaoCe_InitParams.cpp
+  GaoCeConfigSubUi.hpp GaoCeConfigSubUi.cpp
 )
 
 target_link_libraries(APP PUBLIC ${PCL_LIBRARIES} ${VTK_LIBRARIES})

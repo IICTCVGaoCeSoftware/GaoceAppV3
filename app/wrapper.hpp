@@ -1,11 +1,7 @@
 #pragma once
 
-#include "DLP_Calibration.hpp"
-#include "GaoCe_InitParams.hpp"
-#include "MVS_Calibration.h"
-#include "PatternCoding.hpp"
-#include "ReConstructWindow.hpp"
-#include "Worker.hpp"
+#include "GaoCe.hpp"
+#include <Eyestack/Design/Paramgr.hpp>
 #include <Eyestack/Framework.hpp>
 
 namespace esf = Eyestack::Framework;
@@ -73,47 +69,4 @@ public:
   virtual void load_config(
     ::GaoCe::RealTime3DReconstructionParam loadParam) override;
   virtual void reset_config() override;
-};
-
-/**
- * @brief 高测配置UI界面
- */
-class GaoCeConfigSubUi : public esf::MainWindow::SubUi::MdiMenu
-{
-  Q_OBJECT
-
-  using _T = GaoCeConfigSubUi;
-  using _S = esf::MainWindow::SubUi::MdiMenu;
-
-public:
-  MVS_Calibration _MVScal;
-  QMdiSubWindow& _swMVScal;
-
-  DLP_Calibration _DLPcal;
-  QMdiSubWindow& _swDLPcal;
-
-  PatternCoding _PatternCoding;
-  QMdiSubWindow& _swPatternCoding;
-
-  ReConstructWindow _reConWin;
-  QMdiSubWindow& _swReconWin;
-
-  GaoCeConfigUi_MVSInitParams _ip1;
-  GaoCeConfigUi_DLPInitParams _ip2;
-  GaoCeConfigUi_ReInitParams _ip3;
-
-  QMdiSubWindow& _swIp1;
-  QMdiSubWindow& _swIp2;
-  QMdiSubWindow& _swIp3;
-
-public:
-  GaoCeConfigSubUi(Worker& worker);
-
-private slots:
-  void when_show1();
-  void when_show2();
-  void when_show3();
-
-  // void disable_all();
-  // void enable_all();
 };

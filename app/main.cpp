@@ -1,8 +1,11 @@
 #include "GaoCe.hpp"
+#include "GaoCeConfigSubUi.hpp"
 #include "ReConstructWindow.hpp"
 #include "Worker.hpp"
 #include "version.hpp"
 #include "wrapper.hpp"
+
+#define _USE_MATH_DEFINES
 
 int
 main(int argc, char* argv[])
@@ -86,14 +89,13 @@ main(int argc, char* argv[])
 
   GaoCeConfigSubUi _cSubUi{ *worker };
   {
-    _cSubUi._reConWin._getInput_soft = input;
-    _cSubUi._MVScal._getInput = _cSubUi._DLPcal._getInput =
-      _cSubUi._reConWin._getInput = getInput;
+    //    _cSubUi._reConWin._getInput_soft = input;
+    _cSubUi._MVScal._getInput = _cSubUi._DLPcal._getInput = getInput;
   }
   app.reg_sub_ui(_cSubUi);
 
-  //  ReConstructWindow _rSubUi{ *worker };
-  //  app.reg_sub_ui(_rSubUi);
+  ReConRunningSubUi _rSubUi{ *worker };
+  app.reg_sub_ui(_rSubUi);
 
   // 投影仪标定-->投影棋盘格
   QObject::connect(
@@ -103,13 +105,18 @@ main(int argc, char* argv[])
       dlp->WriteTestPatternChessBoard(a, b);
     });
 
+  QObject::connect(&_rSubUi._ui,
+                   &ReConstructWindow::s_show,
+                   &_cSubUi,
+                   &GaoCeConfigSubUi::when_show3);
+
   // 传递信号 Runonce
-  QObject::connect(
-    &_cSubUi._reConWin, &ReConstructWindow::s_Runonce, [worker]() {
-      es::Com_DLP::DlpcWrapper::Shared dlp;
-      dlp->initDlpc();
-      dlp->RunOnce();
-    });
+  //  QObject::connect(
+  //    &worker, &Worker::s_Runonce, [worker]() {
+  //      es::Com_DLP::DlpcWrapper::Shared dlp;
+  //      dlp->initDlpc();
+  //      dlp->RunOnce();
+  //    });
 
   return app.exec();
 }

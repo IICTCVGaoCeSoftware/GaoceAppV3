@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE QtCreatorProject>
-<!-- Written by QtCreator 6.0.2, 2022-07-21T16:28:23. -->
+<!-- Written by QtCreator 6.0.2, 2022-07-22T14:44:54. -->
 <qtcreator>
  <data>
   <variable>EnvironmentId</variable>
@@ -68,8 +68,8 @@
     <value type="bool" key="AutoTest.Framework.QtTest">true</value>
    </valuemap>
    <valuemap type="QVariantMap" key="AutoTest.CheckStates">
-    <value type="Qt::CheckState" key="1@D:/IICT/GaoCeAppV3/test/test_2.cpp:Master Test Suite">Checked</value>
-    <value type="Qt::CheckState" key="1@D:/IICT/GaoCeAppV3/test/test_2.cpp:case_1">Checked</value>
+    <value type="Qt::CheckState" key="1@D:/IICT/GaoCeAppV3/test/test_1.cpp:Master Test Suite">Checked</value>
+    <value type="Qt::CheckState" key="1@D:/IICT/GaoCeAppV3/test/test_1.cpp:case_1">Checked</value>
    </valuemap>
    <value type="int" key="AutoTest.RunAfterBuild">0</value>
    <value type="bool" key="AutoTest.UseGlobal">true</value>
@@ -100,7 +100,7 @@
    <value type="QString" key="ProjectExplorer.ProjectConfiguration.DefaultDisplayName">Desktop Qt 5.15.2 MSVC2019 64bit</value>
    <value type="QString" key="ProjectExplorer.ProjectConfiguration.DisplayName">Desktop Qt 5.15.2 MSVC2019 64bit</value>
    <value type="QString" key="ProjectExplorer.ProjectConfiguration.Id">qt.qt5.5152.win64_msvc2019_64_kit</value>
-   <value type="qlonglong" key="ProjectExplorer.Target.ActiveBuildConfiguration">1</value>
+   <value type="qlonglong" key="ProjectExplorer.Target.ActiveBuildConfiguration">0</value>
    <value type="qlonglong" key="ProjectExplorer.Target.ActiveDeployConfiguration">0</value>
    <value type="qlonglong" key="ProjectExplorer.Target.ActiveRunConfiguration">0</value>
    <valuemap type="QVariantMap" key="ProjectExplorer.Target.BuildConfiguration.0">
@@ -321,7 +321,7 @@
     <value type="bool" key="RunConfiguration.UseLibrarySearchPath">true</value>
     <value type="bool" key="RunConfiguration.UseQmlDebugger">false</value>
     <value type="bool" key="RunConfiguration.UseQmlDebuggerAuto">true</value>
-    <value type="QString" key="RunConfiguration.WorkingDirectory.default">D:/IICT/build-GaoCeAppV3-Desktop_Qt_5_15_2_MSVC2019_64bit-Release/app</value>
+    <value type="QString" key="RunConfiguration.WorkingDirectory.default">D:/IICT/build-GaoCeAppV3-Desktop_Qt_5_15_2_MSVC2019_64bit-Debug/app</value>
    </valuemap>
    <valuemap type="QVariantMap" key="ProjectExplorer.Target.RunConfiguration.1">
     <value type="bool" key="Analyzer.Perf.Settings.UseGlobalSettings">true</value>
@@ -338,7 +338,7 @@
     <value type="bool" key="RunConfiguration.UseLibrarySearchPath">true</value>
     <value type="bool" key="RunConfiguration.UseQmlDebugger">false</value>
     <value type="bool" key="RunConfiguration.UseQmlDebuggerAuto">true</value>
-    <value type="QString" key="RunConfiguration.WorkingDirectory.default">D:/IICT/build-GaoCeAppV3-Desktop_Qt_5_15_2_MSVC2019_64bit-Release/test</value>
+    <value type="QString" key="RunConfiguration.WorkingDirectory.default">D:/IICT/build-GaoCeAppV3-Desktop_Qt_5_15_2_MSVC2019_64bit-Debug/test</value>
    </valuemap>
    <valuemap type="QVariantMap" key="ProjectExplorer.Target.RunConfiguration.2">
     <value type="bool" key="Analyzer.Perf.Settings.UseGlobalSettings">true</value>
@@ -355,7 +355,7 @@
     <value type="bool" key="RunConfiguration.UseLibrarySearchPath">true</value>
     <value type="bool" key="RunConfiguration.UseQmlDebugger">false</value>
     <value type="bool" key="RunConfiguration.UseQmlDebuggerAuto">true</value>
-    <value type="QString" key="RunConfiguration.WorkingDirectory.default">D:/IICT/build-GaoCeAppV3-Desktop_Qt_5_15_2_MSVC2019_64bit-Release/test</value>
+    <value type="QString" key="RunConfiguration.WorkingDirectory.default">D:/IICT/build-GaoCeAppV3-Desktop_Qt_5_15_2_MSVC2019_64bit-Debug/test</value>
    </valuemap>
    <value type="qlonglong" key="ProjectExplorer.Target.RunConfigurationCount">3</value>
   </valuemap>

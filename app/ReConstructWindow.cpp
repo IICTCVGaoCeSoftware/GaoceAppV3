@@ -8,9 +8,9 @@ namespace esd = Eyestack::Design;
 namespace esf = Eyestack::Framework;
 //#define USE_CAM
 
-ReConstructWindow::ReConstructWindow(GaoCe::GaoCe& algo, QWidget* parent)
-  : _S(parent)
-  , _algo(algo)
+ReConstructWindow::ReConstructWindow(QWidget* parent)
+  : QWidget(parent)
+  //  , _algo(algo)
   , _showErr("显示误差")
   , _tranDeepImg("深度图转点云")
 {
@@ -30,16 +30,21 @@ ReConstructWindow::ReConstructWindow(GaoCe::GaoCe& algo, QWidget* parent)
   _selShow.addItem("请选择重构对象");
   _selShow.addItem("构建点云");
   _selShow.addItem("构建深度图");
+  _noStopCheck.setText("不间断运行");
+
+  // 逻辑禁用
   _showCamera.setEnabled(false);
   _showDeepImg.setEnabled(false);
   _showPC.setEnabled(false);
   _tranDeepImg.setEnabled(false);
+
   // 右边菜单栏的垂直界面
   auto vlayout = new QVBoxLayout();
   vlayout->addWidget(&_selShow);
   vlayout->addWidget(&_config);
   vlayout->addWidget(&_reconOnce);
   vlayout->addWidget(&_reconStop);
+  vlayout->addWidget(&_noStopCheck);
   vlayout->addWidget(&_tranDeepImg);
   vlayout->addWidget(&_showCamera);
   vlayout->addWidget(&_showDeepImg);
@@ -217,21 +222,17 @@ ReConstructWindow::on_reconOnce_clicked()
     imgList.push_back(img);
   }
 
-  _algo.recon_pcl_with_gray_liting(imgList, &cloud);
+  //  _algo.recon_pcl_with_gray_liting(imgList, &cloud);
 
   float err = 0;
-  _algo.compute_3dprecision_pointcloud(cloud, &err);
+  //  _algo.compute_3dprecision_pointcloud(cloud, &err);
   QString str = QString("ERROR is %1").arg(err);
   _err.setText(str);
 
   pcl::visualization::CloudViewer viewer("Cloud Viewer");
   _cloud2 = cloud.makeShared();
 
-  _algo.transform_depth_image(cloud, &transform_depth_image);
-
-  qDebug() << "scaleDepth is " << _algo.dump_config()._scaleDepth;
-
-  _deepImg.display_cvmat(transform_depth_image);
+  //  _algo.transform_depth_image(cloud, &transform_depth_image);
 
   vtkSmartPointer<vtkPoints> points = vtkSmartPointer<vtkPoints>::New();
 
@@ -282,7 +283,7 @@ ReConstructWindow::on_reconStop_clicked()
 void
 ReConstructWindow::on_savePCD_clicked()
 {
-  if (cloud.empty()) {
+  if (_cloud->empty()) {
     QMessageBox MBox;
     MBox.setWindowTitle("提示");
     MBox.setText("点云为空，无法保存");
@@ -291,13 +292,13 @@ ReConstructWindow::on_savePCD_clicked()
   }
   QString filename = QFileDialog::getSaveFileName(this, "保存PCD", "*.pcd");
   QFile file(filename);                       //创建文件对象
-  pcl::io::savePCDFile(filename.toStdString(), cloud);
+  pcl::io::savePCDFile(filename.toStdString(), *_cloud);
 }
 
 void
 ReConstructWindow::on_savePLY_clicked()
 {
-  if (cloud.empty()) {
+  if (_cloud->empty()) {
     QMessageBox MBox;
     MBox.setWindowTitle("提示");
     MBox.setText("点云为空，无法保存");
@@ -306,7 +307,7 @@ ReConstructWindow::on_savePLY_clicked()
   }
   QString filename = QFileDialog::getSaveFileName(this, "保存PCD", "*.ply");
   QFile file(filename); //创建文件对象
-  pcl::io::savePLYFile(filename.toStdString(), cloud);
+  pcl::io::savePLYFile(filename.toStdString(), *_cloud);
 }
 
 void
@@ -454,8 +455,54 @@ ReConstructWindow::on_PC_Changed(int state)
   }
 }
 
+void
+ReConstructWindow::display_DeepImg(const cv::Mat& img)
+{
+  _deepImg.display_cvmat(img);
+}
+
 // void
 // ReConstructWindow::on_tranDeepImg_clicked()
 //{
 //   _algo.transform_pointcloud(transform_depth_image, cloud);
 // }
+
+// ==========================================================================
+// ReConRunningSubUi
+// ==========================================================================
+
+ReConRunningSubUi::ReConRunningSubUi(Worker& worker)
+  : _S("运行监控")
+  , _worker(worker)
+{
+  setWidget(&_ui);
+
+  //  connect(
+  //    &_ui, &ReConRunningSubUi::noStopUpdated, this, &_T::when_noStopUpdated);
+
+  //  connect(
+  //    &worker, &Worker::s_displayGaoCeResults, this,
+  //    &_T::when_display_results);
+
+  //  connect(&worker,
+  //          &Worker::s_started,
+  //          this,
+  //          &_T::when_worker_started,
+  //          Qt::BlockingQueuedConnection);
+  //  connect(&worker,
+  //          &Worker::s_stopped,
+  //          this,
+  //          &_T::when_worker_stopped,
+  //          Qt::BlockingQueuedConnection);
+  //  connect(&worker,
+  //          &Worker::s_paused,
+  //          this,
+  //          &_T::when_worker_paused,
+  //          Qt::BlockingQueuedConnection);
+}
+
+void
+ReConRunningSubUi::setup_ui(Eyestack::Framework::MainWindow& mw) noexcept
+{
+  _S::setup_ui(mw);
+}

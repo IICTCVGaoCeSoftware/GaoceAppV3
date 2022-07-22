@@ -7,6 +7,7 @@ VTK_MODULE_INIT(vtkInteractionStyle)
 #include "Eyestack/Design/Monitor.hpp"
 #include "Eyestack/Design/Progressor.hpp"
 #include "GaoCe.hpp"
+#include "Worker.hpp"
 #include "pcl/point_cloud.h"
 #include <Eyestack/Framework.hpp>
 #include <QVTKOpenGLNativeWidget.h>
@@ -22,6 +23,7 @@ VTK_MODULE_INIT(vtkInteractionStyle)
 #include <vtkRenderer.h>
 #include <vtkSmartPointer.h>
 
+namespace esf = Eyestack::Framework;
 namespace esb = Eyestack::Base;
 namespace esd = Eyestack::Design;
 namespace mvs = Eyestack::Com_MVS;
@@ -44,11 +46,30 @@ public:
   std::function<cv::Mat()> _getInput_soft = []() { return cv::Mat(); };
   std::function<cv::Mat()> _getInput = []() { return cv::Mat(); };
 
+signals:
+  /**
+   * @brief 不间断运行模式更新时发射此信号
+   */
+  void s_noStopUpdated(bool checked);
+  /**
+   * @brief 显示重建参数表
+   */
+  void s_show();
+
 public:
+  /**
+   * @brief 配置组件 + 布局
+   */
   ReConstructWindow(QWidget* parent = nullptr);
 
+public:
+  /**
+   * @brief 显示准备图像
+   */
+  void display_DeepImg(const cv::Mat& img);
+
 private:
-  GaoCe::GaoCe& _algo;
+  //  GaoCe::GaoCe& _algo;
   esd::Monitor _camera;
   QTimer _timer;
 
@@ -61,14 +82,12 @@ private:
   QComboBox _selShow;
   QLineEdit _err;
 
+  QCheckBox _noStopCheck;
+  QSharedPointer<pcl::PointCloud<pcl::PointXYZ>> _cloud;
   pcl::PointCloud<pcl::PointXYZ> cloud;
   pcl::PointCloud<pcl::PointXYZ>::Ptr _cloud2;
   cv::Mat transform_depth_image;
   esd::ImageLabel _deepImg;
-
-signals:
-  void s_show();
-  void s_Runonce();
 
 private slots:
   // 当 _timer 计时结束时取帧刷新到界面上
@@ -91,4 +110,30 @@ public:
   // void initialVtkWidget();
   void disable_all();
   void enable_all();
+};
+
+/**
+ * @brief 高测运行监控 窗口界面
+ */
+class ReConRunningSubUi : public esf::MainWindow::SubUi::MdiAction
+{
+  Q_OBJECT
+
+  using _T = ReConRunningSubUi;
+  using _S = esf::MainWindow::SubUi::MdiAction;
+
+public:
+  ReConRunningSubUi(Worker& worker);
+  ReConstructWindow _ui;
+
+private:
+  Worker& _worker;
+  QFile _recordFile;
+  QPushButton _reportButton;
+
+private slots:
+
+  // MainWindow::SubUi interface
+public:
+  virtual void setup_ui(Eyestack::Framework::MainWindow& mw) noexcept override;
 };

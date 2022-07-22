@@ -1,49 +1,5 @@
 #include "wrapper.hpp"
 
-GaoCeConfigSubUi::GaoCeConfigSubUi(Worker& worker)
-  : _S("算法")
-  , _MVScal(*worker._algo)
-  , _swMVScal(add_mdi_action("相机标定", _MVScal))
-  , _DLPcal(*worker._algo)
-  , _swDLPcal(add_mdi_action("投影仪标定", _DLPcal))
-  , _PatternCoding(*worker._algo)
-  , _swPatternCoding(add_mdi_action("图案编码", _PatternCoding))
-  , _reConWin(*worker._algo)
-  , _swReconWin(add_mdi_action("重建窗口", _reConWin))
-  , _ip1(*worker._algo)
-  , _swIp1(add_mdi_action("相机配置", _ip1))
-  , _ip2(*worker._algo)
-  , _swIp2(add_mdi_action("投影仪配置", _ip2))
-  , _ip3(*worker._algo)
-  , _swIp3(add_mdi_action("重建配置", _ip3))
-
-{
-  connect(&_reConWin, &ReConstructWindow::s_show, this, &_T::when_show3);
-  connect(&_MVScal, &MVS_Calibration::s_show, this, &_T::when_show1);
-  connect(&_DLPcal, &DLP_Calibration::s_showParam, this, &_T::when_show2);
-}
-
-void
-GaoCeConfigSubUi::when_show1()
-{
-  _ip1.show();
-  _ip1.setWindowFlags(Qt::WindowStaysOnTopHint);
-}
-
-void
-GaoCeConfigSubUi::when_show2()
-{
-  _ip2.show();
-  _ip2.setWindowFlags(Qt::WindowStaysOnTopHint);
-}
-
-void
-GaoCeConfigSubUi::when_show3()
-{
-  _ip3.show();
-  _ip3.setWindowFlags(Qt::WindowStaysOnTopHint);
-}
-
 Eyestack::Design::Paramgr::Table&
 GaoCeWrapper::param_camera_table()
 {
@@ -245,3 +201,4 @@ GaoCeWrapper::reset_config()
                                               "高测算法");
   }
 }
+
