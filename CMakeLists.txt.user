@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE QtCreatorProject>
-<!-- Written by QtCreator 6.0.2, 2022-07-22T14:44:54. -->
+<!-- Written by QtCreator 6.0.2, 2022-07-25T13:50:01. -->
 <qtcreator>
  <data>
   <variable>EnvironmentId</variable>
@@ -68,8 +68,8 @@
     <value type="bool" key="AutoTest.Framework.QtTest">true</value>
    </valuemap>
    <valuemap type="QVariantMap" key="AutoTest.CheckStates">
-    <value type="Qt::CheckState" key="1@D:/IICT/GaoCeAppV3/test/test_1.cpp:Master Test Suite">Checked</value>
-    <value type="Qt::CheckState" key="1@D:/IICT/GaoCeAppV3/test/test_1.cpp:case_1">Checked</value>
+    <value type="Qt::CheckState" key="1@D:/IICT/GaoCeAppV3/test/test_2.cpp:Master Test Suite">Checked</value>
+    <value type="Qt::CheckState" key="1@D:/IICT/GaoCeAppV3/test/test_2.cpp:case_1">Checked</value>
    </valuemap>
    <value type="int" key="AutoTest.RunAfterBuild">0</value>
    <value type="bool" key="AutoTest.UseGlobal">true</value>
